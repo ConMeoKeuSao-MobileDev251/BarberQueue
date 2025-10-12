@@ -15,13 +15,81 @@ datasource db {
 }
 
 model User {
-  id          String    @id @db.Uuid
-  username    String    @unique
-  password    String    @unique
+  id          Int       @id @default(autoincrement())
+  phoneNumber String    @unique
+  password    String
   fullName    String
   birthDate   DateTime?
-  phoneNumber String    @unique
-  email       String?
+  email       String?   @unique
+  role        String
+  addressId   Int
+  branchId    Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  address Address @relation(fields: [addressId], references: [id])
+  branch  Branch? @relation(fields: [branchId], references: [id])
+
+  clientBookings Booking[] @relation("clientBookings")
+  staffBookings  Booking[] @relation("staffBookings")
+}
+
+model Address {
+  id          Int    @id @default(autoincrement())
+  addressText String
+  latitude    Float
+  longitude   Float
+
+  users    User[]
+  branches Branch[]
+}
+
+model Branch {
+  id          Int      @id @default(autoincrement())
+  name        String
+  phoneNumber String
+  addressId   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  address Address @relation(fields: [addressId], references: [id])
+  users   User[]
+}
+
+model Booking {
+  id            Int      @id @default(autoincrement())
+  status        String
+  startAt       DateTime
+  endAt         DateTime
+  totalDuration Int
+  totalPrice    Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  clientId Int
+  staffId  Int
+
+  bookingServices BookingService[]
+
+  client User @relation("clientBookings", fields: [clientId], references: [id])
+  staff  User @relation("staffBookings", fields: [staffId], references: [id])
+}
+
+model Service {
+  id       Int    @id @default(autoincrement())
+  name     String
+  duration Int
+  price    Float
+
+  bookingServices BookingService[]
+}
+
+model BookingService {
+  bookingId Int
+  serviceId Int
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@id([bookingId, serviceId])
 }
