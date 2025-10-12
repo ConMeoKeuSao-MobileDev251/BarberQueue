@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:latest
+    containter_name: barberqueue
+    environment:
+      POSTGRES_USER: localhost
+      POSTGRES_PASSWORD: abc@123
+      POSTGRES_DB: barberqueue
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres-data
