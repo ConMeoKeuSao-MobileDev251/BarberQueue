@@ -89,30 +89,46 @@ export class AuthService {
                 role: user.role
             }
         } catch (error) {
+            if (error instanceof BadRequestException) {
+                console.error(error)
+                throw error
+            }
+
             console.error(error)
             throw new InternalServerErrorException(error)
         }
     }
 
     async login(loginReqDto: LoginReqDto) {
-        const user = await this.prismaService.user.findUnique({where: {phoneNumber: loginReqDto.phone_number}});
-        if(!user) throw new BadRequestException({
-            status: HttpStatus.BAD_REQUEST,
-            message: 'phone number is incorrect'
-        })
+        try {
+            const user = await this.prismaService.user.findUnique({where: {phoneNumber: loginReqDto.phoneNumber}});
+            if(!user) throw new BadRequestException({
+                status: HttpStatus.BAD_REQUEST,
+                message: 'phone number is incorrect'
+            })
 
-        const isPasswordMatch = await bcrypt.compare(loginReqDto.password, user.password);
-        if(!isPasswordMatch) throw new BadRequestException({
-            status: HttpStatus.BAD_REQUEST,
-            message: 'password is incorrect'
-        })
+            const isPasswordMatch = await bcrypt.compare(loginReqDto.password, user.password);
+            if(!isPasswordMatch) throw new BadRequestException({
+                status: HttpStatus.BAD_REQUEST,
+                message: 'password is incorrect'
+            })
 
-        const accessToken = this.signAccessToken(user.id, user.phoneNumber, user.role);
+            const accessToken = this.signAccessToken(user.id, user.phoneNumber, user.role);
 
-        return {
-            accessToken,
-            fullName: user.fullName,
-            role: user.role
+            return {
+                accessToken,
+                fullName: user.fullName,
+                role: user.role
+            }
+        } catch (error) {
+            if(error instanceof BadRequestException){
+                console.error(error)
+                throw error
+            }
+
+            console.error(error)
+            throw new InternalServerErrorException(error)
         }
+
     }
 }
