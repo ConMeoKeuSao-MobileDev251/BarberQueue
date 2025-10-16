@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, PickType } from "@nestjs/swagger";
 import { CreateUserDto } from "./user.dto";
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Length } from "class-validator";
+import { IsInt, IsNumber, IsOptional, IsString } from "class-validator";
 import { Type } from "class-transformer";
 
 export class RegisterDto extends CreateUserDto{
@@ -55,7 +55,7 @@ export class RegisterDto extends CreateUserDto{
 }
 
 
-export class RegisterResponseDto {
+export class AuthResponseDto {
     @ApiProperty({ example: 'ey....', description: 'an accessToken for user token call guarded API'})
     accessToken: string
 
@@ -66,26 +66,6 @@ export class RegisterResponseDto {
     role: string
 }
 
-export class LoginReqDto {
-    @ApiProperty({ example: '0123456789', description: 'phone number to login' })
-    @IsString()
-    @IsNotEmpty()
-    @Length(10, 10, { message: 'Phone number must be exactly 10 characters' })
-    phone_number: string
+export class LoginReqDto extends PickType(CreateUserDto, ['phoneNumber', 'password']) {
 
-    @ApiProperty({ example: 'password123', description: 'password to login' })
-    @IsString()
-    @IsNotEmpty()
-    password: string
-}
-
-export class LoginResDto {
-    @ApiProperty({ example: 'ey....', description: 'an accessToken for user token call guarded API'})
-    accessToken: string
-
-    @ApiProperty({ example: 'Nguyễn Văn A', description: "user full name for display somewhere"})
-    fullName: string
-
-    @ApiProperty({ example: 'client', description: "user's role"})
-    role: string
 }
