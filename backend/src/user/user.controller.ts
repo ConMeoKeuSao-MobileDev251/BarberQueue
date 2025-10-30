@@ -18,6 +18,11 @@ export class UserController {
   }
 
   @Put('/:id')
+  @ApiOperation({summary: "update user"})
+  @ApiOkResponse({
+    description: "ok",
+    type: UserResponseDto
+  })
   async updateUser(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateUserDto){
     return await this.userService.updateUser(id, body);
   }
