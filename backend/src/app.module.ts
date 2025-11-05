@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { BranchModule } from './branch/branch.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     AuthModule,
     UserModule,
     PrismaModule,
+    BranchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
