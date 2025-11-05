@@ -66,6 +66,4 @@ export class AuthResponseDto {
     role: string
 }
 
-export class LoginReqDto extends PickType(CreateUserDto, ['phoneNumber', 'password']) {
-
-}
+export class LoginReqDto extends PickType(CreateUserDto, ['phoneNumber', 'password']) {}
