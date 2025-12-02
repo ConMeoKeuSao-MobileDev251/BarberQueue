@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { BranchModule } from './branch/branch.module';
 import { BarberServiceModule } from './barber_service/barber_service.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BarberServiceModule } from './barber_service/barber_service.module';
     PrismaModule,
     BranchModule,
     BarberServiceModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

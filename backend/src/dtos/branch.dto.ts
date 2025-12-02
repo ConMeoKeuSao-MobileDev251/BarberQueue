@@ -1,17 +1,57 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Type } from "class-transformer"
-import { IsNotEmpty, IsNumber } from "class-validator"
+import { IsNotEmpty, IsNumber, IsString, MaxLength, MinLength } from "class-validator"
 
-export class GetAllBranchDto{
-    @ApiProperty({example: 175.9373, required: true})
+export class GetAllBranchDto {
+    @ApiProperty({
+        description: "Branch's latitude",
+        example: 175.9373,
+        required: true
+    })
     @IsNotEmpty()
     @IsNumber()
     @Type(() => Number)
     latitude: number
 
-    @ApiProperty({example: -45.4839, required: true})
+    @ApiProperty({
+        description: "Branch's longitude",
+        example: -45.4839,
+        required: true
+    })
     @IsNotEmpty()
     @IsNumber()
     @Type(() => Number)
     longitude: number
+}
+
+export class CreateBranchDto {
+    @ApiProperty({
+        description: 'the name of branch',
+        example: '30Shine Thủ Đức',
+        required: true
+    })
+    @IsNotEmpty()
+    @IsString()
+    name: string
+
+    @ApiProperty({
+        description: "branch's phone number",
+        example: '0123456789',
+        required: true
+    })
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(11)
+    @MinLength(9)
+    phoneNumber: string
+
+    @ApiProperty({
+        description: "branch's address id",
+        example: 3,
+        required: true
+    })
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    addressId: number
 }
