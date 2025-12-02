@@ -5,16 +5,16 @@ import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('address')
 export class AddressController {
-  constructor(private readonly addressService: AddressService) {}
+  constructor(private readonly addressService: AddressService) { }
 
-  @ApiOperation({ description: 'Get all address'})
   @Get()
+  @ApiOperation({ description: 'Get all address' })
   async getAll() {
     return await this.addressService.getAll()
   }
 
-  @ApiOperation({ description: 'Create new address'})
   @Post()
+  @ApiOperation({ description: 'Create new address' })
   async create(createAddressDto: CreateAddressDto) {
     return await this.addressService.create(createAddressDto)
   }

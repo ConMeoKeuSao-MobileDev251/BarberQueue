@@ -1,16 +1,17 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateAddressDto } from 'src/dtos/address.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AddressService {
-    constructor (private readonly prismaService: PrismaService) {}
+    private readonly logger = new Logger('AddressService')
+    constructor(private readonly prismaService: PrismaService) { }
 
-    async getAll(){
+    async getAll() {
         try {
             return await this.prismaService.address.findMany()
         } catch (error) {
-            console.error(error)
+            this.logger.error(error)
             throw new InternalServerErrorException(error)
         }
     }
@@ -21,7 +22,7 @@ export class AddressService {
                 data: createAddressDto
             })
         } catch (error) {
-            console.error(error)
+            this.logger.error(error)
             throw new InternalServerErrorException(error)
         }
     }
