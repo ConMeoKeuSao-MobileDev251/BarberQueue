@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { CreateAddressDto } from 'src/dtos/address.dto';
 import { ApiOperation } from '@nestjs/swagger';
@@ -15,7 +15,7 @@ export class AddressController {
 
   @Post()
   @ApiOperation({ description: 'Create new address' })
-  async create(createAddressDto: CreateAddressDto) {
+  async create(@Body() createAddressDto: CreateAddressDto) {
     return await this.addressService.create(createAddressDto)
   }
 }

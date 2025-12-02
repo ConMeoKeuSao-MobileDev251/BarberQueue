@@ -14,7 +14,8 @@ export class CreateAddressDto {
 
     @ApiProperty({
         description: "Address's latitude",
-        example: 174.394
+        example: 174.394,
+        required: true
     })
     @IsNotEmpty()
     @IsNumber()
@@ -23,7 +24,8 @@ export class CreateAddressDto {
 
     @ApiProperty({
         description: "Address's longitude",
-        example: 174.394
+        example: 174.394,
+        required: true
     })
     @IsNotEmpty()
     @IsNumber()
