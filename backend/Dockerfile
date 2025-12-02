@@ -8,13 +8,19 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install the application dependencies
-RUN npm install --omit=dev
+RUN npm install
 
 # Copy the rest of the application files
 COPY . .
 
 # Generate Prisma client
 RUN npx prisma generate
+
+# Build the TypeScript application
+RUN npm run build
+
+# Remove dev dependencies to reduce image size
+RUN npm prune --omit=dev
 
 # Expose the application port
 EXPOSE 3000
