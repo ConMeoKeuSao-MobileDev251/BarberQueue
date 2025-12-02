@@ -10,9 +10,10 @@ export class AddressController {
   @ApiOperation({ description: 'Get all address'})
   @Get()
   async getAll() {
-    return
+    return await this.addressService.getAll()
   }
 
+  @ApiOperation({ description: 'Create new address'})
   @Post()
   async create(createAddressDto: CreateAddressDto) {
     return await this.addressService.create(createAddressDto)
