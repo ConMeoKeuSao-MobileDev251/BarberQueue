@@ -12,6 +12,7 @@ import { AddressModule } from './address/address.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/jwt.guard';
 import { RolesGuard } from './auth/roles.guard';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RolesGuard } from './auth/roles.guard';
     BranchModule,
     BarberServiceModule,
     AddressModule,
+    BookingModule,
   ],
   controllers: [AppController],
   providers: [

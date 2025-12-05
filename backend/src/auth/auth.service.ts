@@ -34,7 +34,7 @@ export class AuthService {
 
             let user: User | null = null
             //Create new account
-            if (registerDto.role === 'customer') {
+            if (registerDto.role === 'client') {
                 user = await this.prismaService.$transaction(async (prisma) => {
                     if (
                         registerDto.addressText === undefined ||
