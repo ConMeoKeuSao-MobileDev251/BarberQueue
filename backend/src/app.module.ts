@@ -11,6 +11,7 @@ import { BarberServiceModule } from './barber_service/barber_service.module';
 import { AddressModule } from './address/address.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/jwt.guard';
+import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
@@ -28,6 +29,10 @@ import { JwtGuard } from './auth/jwt.guard';
     {
       provide: APP_GUARD,
       useClass: JwtGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
     }
   ],
 })

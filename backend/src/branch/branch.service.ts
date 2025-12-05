@@ -22,15 +22,18 @@ export class BranchService {
                 }
             }).sort((a, b) => a.distance - b.distance)
         } catch (error) {
-            this.logger.error(error)
-            throw new InternalServerErrorException(error)
+            if (!(error instanceof InternalServerErrorException)) {
+                throw error;
+            }
+
+            throw new InternalServerErrorException('Internal Server Error');
         }
     }
 
     async create(createBranchDto: CreateBranchDto) {
         try {
             const existingAddress = await this.prismaService.address.findUnique({
-                where: { id: createBranchDto.addressId}
+                where: { id: createBranchDto.addressId }
             })
 
             if (!existingAddress) {
@@ -44,24 +47,30 @@ export class BranchService {
                 data: createBranchDto
             })
         } catch (error) {
-            this.logger.error(error)
-            throw new InternalServerErrorException(error)
+            if (!(error instanceof InternalServerErrorException)) {
+                throw error;
+            }
+
+            throw new InternalServerErrorException('Internal Server Error');
         }
     }
 
     async delete(id: number) {
         try {
-            const existingAddress = await this.prismaService.branch.findUnique({ where: { id: Number(id) } })
+            const existingAddress = await this.prismaService.branch.findUnique({ where: { id } })
 
             if (!existingAddress) throw new BadRequestException({
                 status: HttpStatus.BAD_REQUEST,
                 message: `The branch with id: ${id} does not exist`
             })
 
-            return await this.prismaService.branch.delete({ where: { id: Number(id) } })
+            return await this.prismaService.branch.delete({ where: { id } })
         } catch (error) {
-            this.logger.error(error)
-            throw new InternalServerErrorException(error)
+            if (!(error instanceof InternalServerErrorException)) {
+                throw error;
+            }
+
+            throw new InternalServerErrorException('Internal Server Error');
         }
     }
 }

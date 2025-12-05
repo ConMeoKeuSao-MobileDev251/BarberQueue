@@ -4,13 +4,13 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { BarberServiceMapper } from 'src/mappers/barber_service.mapper';
+import { CreateBarberServiceDto } from 'src/dtos/barber_service.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class BarberServiceService {
   private readonly logger = new Logger('BarberServiceService');
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async getBarberServiceById(id: number) {
     try {
@@ -22,7 +22,7 @@ export class BarberServiceService {
         throw new NotFoundException('Barber service not found');
       }
 
-      return BarberServiceMapper.toResponse(service);
+      return service
     } catch (error) {
       this.logger.error(error);
       if (!(error instanceof InternalServerErrorException)) {
@@ -35,8 +35,20 @@ export class BarberServiceService {
 
   async getAllBarberServices() {
     try {
-      const services = await this.prismaService.service.findMany();
-      return BarberServiceMapper.toListResponse(services);
+      return await this.prismaService.service.findMany();
+    } catch (error) {
+      this.logger.error(error);
+      if (!(error instanceof InternalServerErrorException)) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Internal Server Error');
+    }
+  }
+
+  async create(createBarberServiceDto: CreateBarberServiceDto) {
+    try {
+      return await this.prismaService.service.create({ data: createBarberServiceDto })
     } catch (error) {
       this.logger.error(error);
       if (!(error instanceof InternalServerErrorException)) {
