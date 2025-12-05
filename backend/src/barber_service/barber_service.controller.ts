@@ -1,7 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { BarberServiceService } from './barber_service.service';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
-import { BarberServiceResponseDto } from 'src/dtos/barber_service.dto';
+import { BarberServiceResponseDto, CreateBarberServiceDto } from 'src/dtos/barber_service.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Role } from 'src/enums/role.enum';
 
 @Controller('barber-services')
 export class BarberServiceController {
@@ -17,6 +19,7 @@ export class BarberServiceController {
     return await this.barberService.getBarberServiceById(id);
   }
 
+
   @Get()
   @ApiOperation({ summary: 'Get all barber services' })
   @ApiOkResponse({
@@ -25,5 +28,12 @@ export class BarberServiceController {
   })
   async getAllBarberServices() {
     return await this.barberService.getAllBarberServices();
+  }
+
+  @Roles(Role.OWNER)
+  @Post()
+  @ApiOperation({summary: 'Create new barber service'})
+  async create(@Body() createBarberServiceDto: CreateBarberServiceDto) {
+    return await this.barberService.create(createBarberServiceDto)
   }
 }

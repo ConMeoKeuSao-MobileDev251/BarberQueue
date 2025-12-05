@@ -2,11 +2,13 @@ import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { LoginReqDto, AuthResponseDto, RegisterDto } from 'src/dtos/auth.dto';
+import { SkipAuth } from 'src/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @SkipAuth()
   @Post('register')
   @ApiOperation({ summary: "User sign up new account"})
   @ApiOkResponse({
@@ -17,6 +19,7 @@ export class AuthController {
     return await this.authService.register(registerDto)
   }
 
+  @SkipAuth()
   @Post('login')
   @ApiOperation({ summary: "User login to the system" })
   @ApiOkResponse({

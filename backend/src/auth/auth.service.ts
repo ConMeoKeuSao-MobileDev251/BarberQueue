@@ -12,8 +12,8 @@ export class AuthService {
         private readonly jwtService: JwtService
     ) { }
 
-    private signAccessToken (userId: number, phoneNumber: string, role: string){
-        return this.jwtService.sign({userId, phoneNumber, role}, {
+    private signAccessToken(userId: number, phoneNumber: string, role: string) {
+        return this.jwtService.sign({ userId, phoneNumber, role }, {
             secret: process.env.JWT_SECRET,
             expiresIn: '1h'
         })
@@ -89,26 +89,24 @@ export class AuthService {
                 role: user.role
             }
         } catch (error) {
-            if (error instanceof BadRequestException) {
-                console.error(error)
-                throw error
+            if (!(error instanceof InternalServerErrorException)) {
+                throw error;
             }
 
-            console.error(error)
-            throw new InternalServerErrorException(error)
+            throw new InternalServerErrorException('Internal Server Error');
         }
     }
 
     async login(loginReqDto: LoginReqDto) {
         try {
-            const user = await this.prismaService.user.findUnique({where: {phoneNumber: loginReqDto.phoneNumber}});
-            if(!user) throw new BadRequestException({
+            const user = await this.prismaService.user.findUnique({ where: { phoneNumber: loginReqDto.phoneNumber } });
+            if (!user) throw new BadRequestException({
                 status: HttpStatus.BAD_REQUEST,
                 message: 'phone number is incorrect'
             })
 
             const isPasswordMatch = await bcrypt.compare(loginReqDto.password, user.password);
-            if(!isPasswordMatch) throw new BadRequestException({
+            if (!isPasswordMatch) throw new BadRequestException({
                 status: HttpStatus.BAD_REQUEST,
                 message: 'password is incorrect'
             })
@@ -121,13 +119,11 @@ export class AuthService {
                 role: user.role
             }
         } catch (error) {
-            if(error instanceof BadRequestException){
-                console.error(error)
-                throw error
+            if (!(error instanceof InternalServerErrorException)) {
+                throw error;
             }
 
-            console.error(error)
-            throw new InternalServerErrorException(error)
+            throw new InternalServerErrorException('Internal Server Error');
         }
 
     }
