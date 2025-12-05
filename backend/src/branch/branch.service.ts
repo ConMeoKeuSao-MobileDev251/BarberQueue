@@ -29,6 +29,17 @@ export class BranchService {
 
     async create(createBranchDto: CreateBranchDto) {
         try {
+            const existingAddress = await this.prismaService.address.findUnique({
+                where: { id: createBranchDto.addressId}
+            })
+
+            if (!existingAddress) {
+                throw new BadRequestException({
+                    status: HttpStatus.BAD_REQUEST,
+                    message: `Address with id ${createBranchDto.addressId} does not exist`
+                })
+            }
+
             return await this.prismaService.branch.create({
                 data: createBranchDto
             })

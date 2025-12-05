@@ -62,7 +62,7 @@ export class AuthResponseDto {
     @ApiProperty({ example: 'Nguyễn Văn A', description: "user full name for display somewhere"})
     fullName: string
 
-    @ApiProperty({ example: 'client', description: "user's role"})
+    @ApiProperty({ example: 'customer', description: "user's role"})
     role: string
 }
 

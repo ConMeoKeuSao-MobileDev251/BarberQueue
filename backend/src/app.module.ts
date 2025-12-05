@@ -9,6 +9,8 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { BranchModule } from './branch/branch.module';
 import { BarberServiceModule } from './barber_service/barber_service.module';
 import { AddressModule } from './address/address.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtGuard } from './auth/jwt.guard';
 
 @Module({
   imports: [
@@ -21,7 +23,13 @@ import { AddressModule } from './address/address.module';
     AddressModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard
+    }
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
