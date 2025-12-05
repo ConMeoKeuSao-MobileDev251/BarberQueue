@@ -1,10 +1,11 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { BranchService } from './branch.service';
 import { CreateBranchDto, GetAllBranchDto } from 'src/dtos/branch.dto';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
 
+@ApiBearerAuth()
 @Controller('branch')
 export class BranchController {
   constructor(private readonly branchService: BranchService) { }

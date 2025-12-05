@@ -1,4 +1,4 @@
-import { ApiProperty, PickType } from "@nestjs/swagger";
+import { ApiProperty, OmitType, PickType } from "@nestjs/swagger";
 import { CreateUserDto } from "./user.dto";
 import { IsInt, IsNumber, IsOptional, IsString } from "class-validator";
 import { Type } from "class-transformer";
@@ -54,6 +54,9 @@ export class RegisterDto extends CreateUserDto{
     longitude?: number
 }
 
+export class ClientRegisterDto extends OmitType(RegisterDto, ['addressId', 'branchId'] as const) {}
+
+export class StaffOrOwnerRegisterDto extends OmitType(RegisterDto, ['addressText', 'latitude', 'longitude'] as const) {}
 
 export class AuthResponseDto {
     @ApiProperty({ example: 'ey....', description: 'an accessToken for user token call guarded API'})

@@ -1,10 +1,11 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { BarberServiceService } from './barber_service.service';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { BarberServiceResponseDto, CreateBarberServiceDto } from 'src/dtos/barber_service.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
 
+@ApiBearerAuth()
 @Controller('barber-services')
 export class BarberServiceController {
   constructor(private readonly barberService: BarberServiceService) {}
