@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CreateBookingDto } from 'src/dtos/booking.dto';
@@ -17,7 +17,17 @@ export class BookingController {
     return await this.bookingService.create(createBookingDto)
   }
 
-  @ApiOperation({ summary: 'get booking list with pagination'})
-  @Get('/paging')
-  async getPaging( ){}
+
+
+  @ApiOperation({ summary: 'get history bookings by user role and id'})
+  @Get('/:role/:id/history')
+  async getHistory(
+    @Param('role') role: Role,
+    @Param('id') id: number,
+    @Query('page') page: number,
+    @Query('limit') limit: number
+   ){
+    return await this.bookingService.getHistory(role, id, page, limit);
+   }
 }
+

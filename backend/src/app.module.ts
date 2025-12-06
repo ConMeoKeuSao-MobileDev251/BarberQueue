@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/jwt.guard';
 import { RolesGuard } from './auth/roles.guard';
 import { BookingModule } from './booking/booking.module';
+import { BookingServiceModule } from './booking_service/booking_service.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { BookingModule } from './booking/booking.module';
     BarberServiceModule,
     AddressModule,
     BookingModule,
+    BookingServiceModule,
   ],
   controllers: [AppController],
   providers: [

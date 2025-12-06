@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt'
 import { User } from 'generated/prisma';
 import { JwtService } from '@nestjs/jwt';
+import e from 'express';
 
 @Injectable()
 export class AuthService {
@@ -151,7 +152,7 @@ export class AuthService {
                 throw error;
             }
 
-            throw new InternalServerErrorException('Internal Server Error');
+            throw new InternalServerErrorException('Error when logging in', error);
         }
 
     }

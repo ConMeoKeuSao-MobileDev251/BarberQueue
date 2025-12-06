@@ -1,8 +1,9 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { LoginReqDto, AuthResponseDto, RegisterDto, ClientRegisterDto, StaffOrOwnerRegisterDto } from 'src/dtos/auth.dto';
 import { SkipAuth } from 'src/decorators/public.decorator';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -40,5 +41,10 @@ export class AuthController {
   @HttpCode(200)
   async login(@Body() loginDto: LoginReqDto) {
     return await this.authService.login(loginDto)
+  }
+  @ApiOperation({ summary: "Get profile of logged in user" })
+  @Get('/me')
+  async getProfile(@Req() request: Request & { user: any }) {
+    return await request?.user;
   }
 }

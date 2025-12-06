@@ -7,7 +7,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from 'generated/prisma';
-import { UpdateUserDto } from 'src/dtos/user.dto';
+import { UpdateUserDto, UserResponseDto } from 'src/dtos/user.dto';
+import { Role } from 'src/enums/role.enum';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
@@ -119,6 +120,61 @@ export class UserService {
         throw error;
       }
       throw new InternalServerErrorException('Internal Server Error');
+    }
+  }
+
+  async getAvailableStaffByBranchId(branchId: number, startTime: Date, endTime: Date) {
+    try {
+      const existingBranch = await this.prismaService.branch.findUnique({ where: { id: branchId } });
+      if (!existingBranch) {
+        throw new BadRequestException({
+          status: HttpStatus.BAD_REQUEST,
+          message: `Branch with id ${branchId} does not exist`
+        });
+      }
+
+      const staffsInBranch = await this.prismaService.user.findMany({
+        where: {
+          branchId: branchId,
+          role: Role.STAFF
+        },
+        select: this.userResponse
+      });
+
+      const availableStaffs = staffsInBranch.filter(async (staff) => {
+        const conflictingBookings = await this.prismaService.booking.findMany({
+          where: {
+            staffId: staff.id,
+            OR: [
+              {
+                startAt: {
+                  gte: startTime,
+                  lt: endTime
+                }
+              },
+              {
+                endAt: {
+                  gt: startTime,
+                  lte: endTime
+                }
+              },
+              {
+                startAt: {
+                  lte: startTime
+                },
+                endAt: {
+                  gte: endTime
+                }
+              }
+            ]
+          },
+        });
+        return conflictingBookings.length === 0;
+      });
+
+      return availableStaffs;
+    } catch (error) {
+      
     }
   }
 }

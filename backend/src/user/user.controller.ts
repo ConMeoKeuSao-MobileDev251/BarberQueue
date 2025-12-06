@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseDatePipe, ParseIntPipe, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { UpdateUserDto, UserResponseDto } from 'src/dtos/user.dto';
@@ -18,6 +18,17 @@ export class UserController {
   })
   async getById(@Param('id', ParseIntPipe) id: number){
     return await this.userService.getById(id);
+  }
+
+  @Get('/staff/:branchId/availability')
+  @ApiOperation({summary: "get available staff by branch id and time range"})
+  @Roles(Role.OWNER, Role.CLIENT)
+  async getAvailableStaffByBranchId(
+    @Param('branchId', ParseIntPipe) branchId: number,
+    @Query('startTime', ParseDatePipe) startTime: Date,
+    @Query('endTime', ParseDatePipe) endTime: Date
+  ){
+    return await this.userService.getAvailableStaffByBranchId(branchId, startTime, endTime);
   }
 
   @Put(':id')
