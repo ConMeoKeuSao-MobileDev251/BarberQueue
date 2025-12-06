@@ -25,8 +25,8 @@ export class UserController {
   @Roles(Role.OWNER, Role.CLIENT)
   async getAvailableStaffByBranchId(
     @Param('branchId', ParseIntPipe) branchId: number,
-    @Query('startTime', ParseDatePipe) startTime: Date,
-    @Query('endTime', ParseDatePipe) endTime: Date
+    @Query('startTime') startTime: Date,
+    @Query('endTime') endTime: Date
   ){
     return await this.userService.getAvailableStaffByBranchId(branchId, startTime, endTime);
   }
