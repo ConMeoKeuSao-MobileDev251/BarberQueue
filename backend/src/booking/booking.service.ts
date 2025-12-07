@@ -78,6 +78,7 @@ export class BookingService {
             });
             return bookings;
         } catch (error) {
+            console.error(error);
             if (!(error instanceof InternalServerErrorException)) {
                 throw error;
             }
