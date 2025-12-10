@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from 'generated/prisma';
-import { UpdateUserDto, UserResponseDto } from 'src/dtos/user.dto';
+import { CurrentUserDto, UpdateUserDto, UserResponseDto } from 'src/dtos/user.dto';
 import { Role } from 'src/enums/role.enum';
 
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -73,19 +73,30 @@ export class UserService {
     }
   }
 
-  async update(id: number, data: UpdateUserDto) {
+  async update(
+    id: number, 
+    data: UpdateUserDto, 
+    user: CurrentUserDto
+  ) {
     try {
-      let user = await this.prismaService.user.findUnique({
+      if(user.userId !== id){
+        throw new BadRequestException({
+          status: HttpStatus.BAD_REQUEST,
+          message: 'You do not have permission to update other users'
+        })
+      }
+
+      let existingUser = await this.prismaService.user.findUnique({
         where: { id: id },
       });
-      if (!user) {
+      if (!existingUser) {
         throw new NotFoundException('User not found');
       }
 
-      user = this.buildUpdateData(user, data);
+      existingUser = this.buildUpdateData(existingUser, data);
       return await this.prismaService.user.update({
         where: { id: id },
-        data: user,
+        data: existingUser,
         select: this.userResponse
       });
 
@@ -100,8 +111,15 @@ export class UserService {
     }
   }
 
-  async delete(id: number) {
+  async delete(id: number, user: CurrentUserDto) {
     try {
+      if(user.userId === id){
+        throw new BadRequestException({
+          status: HttpStatus.BAD_REQUEST,
+          message: 'You cannot delete your own account'
+        })
+      }
+
       const existingUser = await this.prismaService.user.findUnique({ where: { id } })
 
       if (!existingUser) {

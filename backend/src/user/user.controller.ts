@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, Param, ParseDatePipe, ParseIntPipe, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
-import { UpdateUserDto, UserResponseDto } from 'src/dtos/user.dto';
+import { CurrentUserDto, UpdateUserDto, UserResponseDto } from 'src/dtos/user.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -37,14 +38,21 @@ export class UserController {
     description: "ok",
     type: UserResponseDto
   })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateUserDto){
-    return await this.userService.update(id, body);
+  async update(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() body: UpdateUserDto,
+    @CurrentUser() user: CurrentUserDto
+  ){
+    return await this.userService.update(id, body, user);
   }
 
   @Roles(Role.OWNER)
   @Delete(':id')
   @ApiOperation({summary: "delete user by id"})
-  async delete (@Param('id', ParseIntPipe) id: number){
-    return await this.userService.delete(id)
+  async delete (
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: CurrentUserDto
+  ){
+    return await this.userService.delete(id, user)
   }
 }

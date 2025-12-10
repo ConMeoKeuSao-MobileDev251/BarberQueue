@@ -1,5 +1,6 @@
-import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateBookingDto } from 'src/dtos/booking.dto';
+import { CurrentUserDto } from 'src/dtos/user.dto';
 import { Role } from 'src/enums/role.enum';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -7,8 +8,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class BookingService {
     constructor(private readonly prismaService: PrismaService) { }
 
-    async create(createBookingDto: CreateBookingDto) {
+    async create(createBookingDto: CreateBookingDto, user: CurrentUserDto) {
         try {
+            if(user.userId !== createBookingDto.clientId){
+                throw new ForbiddenException({
+                    status: HttpStatus.FORBIDDEN,
+                    message: 'You do not have permission to create booking for other clients'
+                })
+            }
+
             const existingClient = await this.prismaService.user.findUnique({
                 where: { id: createBookingDto.clientId }
             })
@@ -43,8 +51,21 @@ export class BookingService {
         }
     }
 
-    async getHistory(role: string, id: number, page: number, limit: number) {
+    async getHistory(
+        role: string, 
+        id: number, 
+        page: number, 
+        limit: number,
+        user: CurrentUserDto
+    ) {
         try {
+            if (user.role !== Role.OWNER && user.userId !== id){
+                throw new ForbiddenException({
+                    status: HttpStatus.FORBIDDEN,
+                    message: 'You do not have permission to access this resource'
+                })
+            }
+
             const existingUser = await this.prismaService.user.findUnique({ where: { id } });
 
             if (!existingUser) {  

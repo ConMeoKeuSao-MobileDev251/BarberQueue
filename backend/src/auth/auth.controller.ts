@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { LoginReqDto, AuthResponseDto, RegisterDto, ClientRegisterDto, StaffOrOwnerRegisterDto } from 'src/dtos/auth.dto';
 import { SkipAuth } from 'src/decorators/public.decorator';
 import { Request } from 'express';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -46,7 +47,7 @@ export class AuthController {
   @Get('/me')
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get profile of logged in user" })
-  async getProfile(@Req() request: Request & { user: any }) {
-    return request.user;
+  async getProfile(@CurrentUser() user) {
+    return user;
   }
 }

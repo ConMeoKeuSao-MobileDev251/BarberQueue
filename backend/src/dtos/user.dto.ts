@@ -92,4 +92,11 @@ export class UserResponseDto {
 
 export class UpdateUserDto extends PartialType(
   OmitType(CreateUserDto, ['password', 'role']),
-) {}
+) { }
+
+export class CurrentUserDto {
+  userId: number
+  fullName: string
+  phoneNumber: string
+  role: string
+}

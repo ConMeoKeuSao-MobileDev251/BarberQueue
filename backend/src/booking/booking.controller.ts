@@ -4,30 +4,33 @@ import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CreateBookingDto } from 'src/dtos/booking.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
+import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { CurrentUserDto } from 'src/dtos/user.dto';
 
 @ApiBearerAuth()
 @Controller('booking')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(private readonly bookingService: BookingService) { }
 
   @Roles(Role.CLIENT)
-  @ApiOperation({ summary: 'create new booking'})
+  @ApiOperation({ summary: 'create new booking' })
   @Post()
-  async create(@Body() createBookingDto: CreateBookingDto){
-    return await this.bookingService.create(createBookingDto)
+  async create(@Body() createBookingDto: CreateBookingDto, @CurrentUser() user: CurrentUserDto) {
+    return await this.bookingService.create(createBookingDto, user)
   }
 
 
 
-  @ApiOperation({ summary: 'get history bookings by user role and id'})
+  @ApiOperation({ summary: 'get history bookings by user role and id' })
   @Get('/:role/:id/history')
   async getHistory(
     @Param('role') role: Role,
     @Param('id', ParseIntPipe) id: number,
     @Query('page', ParseIntPipe) page: number,
-    @Query('limit', ParseIntPipe) limit: number
-   ){
-    return await this.bookingService.getHistory(role, id, page, limit);
-   }
+    @Query('limit', ParseIntPipe) limit: number,
+    @CurrentUser() user: CurrentUserDto
+   ) {
+    return await this.bookingService.getHistory(role, id, page, limit, user);
+  }
 }
 
