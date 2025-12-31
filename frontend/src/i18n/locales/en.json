@@ -1,0 +1,133 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Continue",
+    "continue": "Continue",
+    "skip": "Skip",
+    "done": "Done",
+    "search": "Search",
+    "seeAll": "See all"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "phoneNumber": "Phone Number",
+    "password": "Password",
+    "fullName": "Full Name",
+    "email": "Email",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "logoutConfirm": "Are you sure you want to logout?"
+  },
+  "onboarding": {
+    "slide1": {
+      "title": "Easy Booking",
+      "description": "Find and book at top barbershops near you"
+    },
+    "slide2": {
+      "title": "Choose Your Stylist",
+      "description": "View portfolios and reviews to find the perfect match"
+    },
+    "slide3": {
+      "title": "Convenient Payment",
+      "description": "Multiple secure and fast payment methods"
+    },
+    "getStarted": "Get Started"
+  },
+  "home": {
+    "greeting": "Hello",
+    "searchPlaceholder": "Search barbershops...",
+    "promotions": "Promotions",
+    "nearYou": "Featured near you",
+    "open": "Open",
+    "closed": "Closed"
+  },
+  "shop": {
+    "services": "Services",
+    "reviews": "Reviews",
+    "about": "About",
+    "recommended": "Recommended",
+    "combo": "Combo",
+    "addToCart": "Select",
+    "minutes": "min",
+    "call": "Call",
+    "directions": "Directions",
+    "share": "Share"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "selectStylist": "Select Stylist",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
+    "promo": "Promo",
+    "viewPromos": "View",
+    "paymentMethod": "Payment Method",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "confirmBooking": "Confirm Booking",
+    "deleteService": "Delete Service",
+    "deleteConfirm": "Are you sure you want to delete this service?"
+  },
+  "booking": {
+    "history": "History",
+    "past": "Past",
+    "upcoming": "Upcoming",
+    "favorites": "Favorites",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "review": "Review",
+    "rebook": "Rebook",
+    "cancel": "Cancel",
+    "contact": "Contact",
+    "orderDetails": "Order Details",
+    "bookingSuccess": "Booking Confirmed!",
+    "cancelConfirm": "Are you sure you want to cancel this booking?"
+  },
+  "account": {
+    "title": "Account",
+    "editProfile": "Edit",
+    "history": "History",
+    "payment": "Payment",
+    "addresses": "Manage Addresses",
+    "notifications": "Notifications",
+    "becomePartner": "Become a Partner",
+    "paymentMethods": "Payment Methods",
+    "addPayment": "Add Payment Method",
+    "addCard": "Add Card",
+    "cardNumber": "Card Number",
+    "cardName": "Name on Card",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "savedAddresses": "Saved Addresses"
+  },
+  "address": {
+    "enterAddress": "Enter your address",
+    "confirmAddress": "Confirm Address",
+    "change": "Change",
+    "home": "Home",
+    "work": "Work",
+    "deleteConfirm": "Are you sure you want to delete this address?"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidPhone": "Invalid phone number",
+    "invalidEmail": "Invalid email address",
+    "minLength": "Minimum {{min}} characters",
+    "maxLength": "Maximum {{max}} characters"
+  }
+}
