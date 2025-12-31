@@ -1,0 +1,165 @@
+/plan
+
+---
+
+## Project Overview
+
+Create a detailed plan to implement the UI frontend for the BarberQueue barbershop booking app.
+
+### Current Repository Structure:
+```
+BarberQueue/
+├── backend/          # <- Research APIs from here
+├── frontend/         # <- Code frontend here
+└── README.md
+
+barberqueue-claude/   # <- Claudekit Project
+├── .claude/
+├── designs/          # <- Figma design screenshots
+├── plans/
+├── .gitignore
+├── .repomixignore
+└── CLAUDE.md
+```
+
+---
+
+## Tech Stack (Required)
+
+| Category | Technology | Notes |
+|----------|------------|-------|
+| Framework | React Native + Expo | Managed workflow |
+| Language | TypeScript (TSX) | Strict mode |
+| Routing | Expo Router | File-based routing |
+| Styling | NativeWind v4 | TailwindCSS for RN |
+| UI Framework | Custom components | Consistent design system |
+| State Management | Zustand | Lightweight, simple |
+| Data Fetching | TanStack Query (React Query) | Caching, mutations |
+| Forms | React Hook Form + Zod | Validation |
+| i18n | i18next + react-i18next | Multi-language support |
+
+---
+
+## DETAILED ANALYSIS REQUIREMENTS
+
+### 1. Backend API Analysis
+
+Thoroughly read the `BarberQueue/backend/` directory and perform:
+
+a) List ALL API endpoints:
+- HTTP Method (GET/POST/PUT/DELETE)
+- URL path
+- Request body/params
+- Response structure
+- Authentication required (Yes/No)
+
+b) Categorize APIs by module:
+- Auth APIs: Login, Register, Logout, Refresh Token, Forgot Password
+- User APIs: Profile, Update Profile, Change Password
+- Barber/Shop APIs: List, Detail, Search, Filter
+- Service APIs: List services, Prices
+- Booking APIs: Create, List, Cancel, Update status
+- Review APIs: Create, List
+- Notification APIs: List, Mark as read
+
+c) Identify Authentication flow:
+- Token type (JWT/Session?)
+- Token storage strategy
+- Refresh token mechanism
+- Protected vs Public routes
+
+d) Create TypeScript interfaces for all API responses
+
+---
+
+### 2. Design Analysis
+
+Review ALL screenshots in `barberqueue-claude/designs/` and:
+
+a) List all screens in format:
+```
+[Number] - [Screen Name] - [Brief Description] - [Required APIs]
+```
+
+b) Identify Design Tokens:
+- Colors: Primary, Secondary, Background, Text, Error, Success
+- Typography: Font family, sizes, weights
+- Spacing: Base unit, common spacings
+- Border Radius: Buttons, Cards, Inputs
+- Shadows: Card shadows, button shadows
+
+c) Define Navigation Structure with Expo Router
+
+---
+
+### 3. Frontend Code Structure
+
+Propose folder structure for `BarberQueue/frontend/` including:
+- app/ (Expo Router pages)
+- src/components/ui/ (Base UI components)
+- src/components/forms/ (Form components)
+- src/components/layout/ (Layout components)
+- src/components/shared/ (Feature components)
+- src/api/ (API client, hooks, types)
+- src/stores/ (Zustand stores)
+- src/hooks/ (Custom hooks)
+- src/i18n/ (Translations)
+- src/utils/ (Helpers)
+- src/constants/ (Colors, spacing, config)
+- src/types/ (Global types)
+
+---
+
+### 4. Component Library (Design System)
+
+Identify base components needed to ensure consistency:
+
+- Button: variants (primary, secondary, outline, ghost, danger), sizes, loading state
+- Input: variants, error state, icons
+- Card: variants (elevated, outlined), pressable
+- Avatar: sizes
+- Badge: variants (success, warning, error)
+- Skeleton: loading placeholder
+- EmptyState: empty data display
+- ErrorState: error with retry
+
+---
+
+### 5. Screen-to-API Mapping
+
+Create mapping table:
+
+| Screen | APIs Used | State Needed | Components |
+|--------|-----------|--------------|------------|
+| ... | ... | ... | ... |
+
+---
+
+## EXPECTED OUTPUT
+
+Create the following files in `barberqueue-claude/plans/`:
+
+1. `api-documentation.md` - Complete list of API endpoints, TypeScript interfaces
+2. `screen-inventory.md` - List of screens, descriptions, screen-to-API mapping
+3. `design-tokens.md` - Colors, Typography, Spacing, Component specs
+4. `task-breakdown.md` - Tasks for each phase, estimated time, dependencies
+5. `technical-decisions.md` - Technical decisions, trade-offs, potential challenges
+
+---
+
+## IMPORTANT NOTES
+
+1. Consistency is priority #1: All UI elements must use components from the design system
+2. Type-safe: All API responses must have TypeScript interfaces
+3. Reusability: Extract component when pattern repeats > 2 times
+4. i18n from the start: All displayed text must go through translation
+5. Error handling: All API calls must have error states
+6. Loading states: Use Skeleton instead of spinner when possible
+
+---
+
+## START
+
+1. Read `BarberQueue/backend/` and `BarberQueue/frontend/` to scout codebase and list all APIs and devise plans
+2. Review `barberqueue-claude/designs/` to inventory all screens
+3. Create plan files in `barberqueue-claude/plans/`
