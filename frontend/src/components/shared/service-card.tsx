@@ -2,6 +2,7 @@
  * Service Card Component
  * Displays a service with image, name, price, and duration
  */
+import { memo, useCallback } from "react";
 import { View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,7 +21,7 @@ interface ServiceCardProps {
   variant?: "vertical" | "horizontal";
 }
 
-export function ServiceCard({
+function ServiceCardComponent({
   name,
   price,
   duration,
@@ -31,16 +32,16 @@ export function ServiceCard({
   inCart = false,
   variant = "vertical",
 }: ServiceCardProps) {
-  const formatPrice = (amount: number) => {
+  const formatPrice = useCallback((amount: number) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
-  };
+  }, []);
 
-  const formatDuration = (mins: number) => {
+  const formatDuration = useCallback((mins: number) => {
     if (mins < 60) return `${mins} phút`;
     const hours = Math.floor(mins / 60);
     const remainingMins = mins % 60;
     return remainingMins > 0 ? `${hours}h${remainingMins}p` : `${hours} giờ`;
-  };
+  }, []);
 
   if (variant === "horizontal") {
     return (
@@ -178,3 +179,6 @@ export function ServiceCard({
     </Pressable>
   );
 }
+
+// Memoized export for performance optimization
+export const ServiceCard = memo(ServiceCardComponent);

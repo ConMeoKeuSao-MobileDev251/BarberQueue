@@ -7,3 +7,4 @@ export { branchesApi } from "./branches";
 export { servicesApi } from "./services";
 export { bookingsApi } from "./bookings";
 export { addressesApi } from "./addresses";
+export { usersApi } from "./users";

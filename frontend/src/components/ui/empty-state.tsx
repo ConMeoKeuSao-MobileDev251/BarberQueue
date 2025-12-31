@@ -107,3 +107,15 @@ export function EmptyCart({ onAction }: { onAction?: () => void }) {
     />
   );
 }
+
+export function EmptyAddresses({ onAction }: { onAction?: () => void }) {
+  return (
+    <EmptyState
+      icon="location-outline"
+      title="Chưa có địa chỉ"
+      description="Bạn chưa lưu địa chỉ nào. Thêm địa chỉ để đặt lịch dễ dàng hơn!"
+      actionLabel="Thêm địa chỉ"
+      onAction={onAction}
+    />
+  );
+}

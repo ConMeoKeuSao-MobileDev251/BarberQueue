@@ -10,6 +10,8 @@
     "edit": "Edit",
     "back": "Back",
     "next": "Continue",
+    "continue": "Continue",
+    "skip": "Skip",
     "done": "Done",
     "search": "Search",
     "seeAll": "See all"
@@ -30,12 +32,18 @@
     "logoutConfirm": "Are you sure you want to logout?"
   },
   "onboarding": {
-    "slide1Title": "Easy Booking",
-    "slide1Desc": "Find and book at top barbershops near you",
-    "slide2Title": "Choose Your Stylist",
-    "slide2Desc": "View portfolios and reviews to find the perfect match",
-    "slide3Title": "Convenient Payment",
-    "slide3Desc": "Multiple secure and fast payment methods",
+    "slide1": {
+      "title": "Easy Booking",
+      "description": "Find and book at top barbershops near you"
+    },
+    "slide2": {
+      "title": "Choose Your Stylist",
+      "description": "View portfolios and reviews to find the perfect match"
+    },
+    "slide3": {
+      "title": "Convenient Payment",
+      "description": "Multiple secure and fast payment methods"
+    },
     "getStarted": "Get Started"
   },
   "home": {

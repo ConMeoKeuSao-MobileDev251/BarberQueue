@@ -15,8 +15,12 @@ export const colors = {
   // Semantic
   coral: "#F26B5B",
   success: "#4CAF50",
+  successLight: "#E8F5E9",
   info: "#2196F3",
   warning: "#FFC107",
+  warningLight: "#FFF8E1",
+  error: "#F44336",
+  errorLight: "#FFEBEE",
 
   // Text
   textPrimary: "#1A1A1A",

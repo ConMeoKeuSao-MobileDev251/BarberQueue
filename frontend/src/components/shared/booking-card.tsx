@@ -2,6 +2,7 @@
  * Booking Card Component
  * Displays a booking with status, date, shop, and services
  */
+import { memo, useCallback } from "react";
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Avatar } from "@/src/components/ui/avatar";
@@ -30,7 +31,7 @@ interface BookingCardProps {
   onRebook?: () => void;
 }
 
-export function BookingCard({
+function BookingCardComponent({
   shopName,
   shopImage,
   status,
@@ -42,16 +43,16 @@ export function BookingCard({
   onCancel,
   onRebook,
 }: BookingCardProps) {
-  const formatDate = (dateStr: string) => {
+  const formatDate = useCallback((dateStr: string) => {
     const d = new Date(dateStr);
     const weekdays = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
     const day = weekdays[d.getDay()];
     return `${day}, ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-  };
+  }, []);
 
-  const formatPrice = (amount: number) => {
+  const formatPrice = useCallback((amount: number) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
-  };
+  }, []);
 
   const canCancel = status === "pending" || status === "confirmed";
   const canRebook = status === "completed" || status === "cancelled";
@@ -133,6 +134,9 @@ export function BookingCard({
   );
 }
 
+// Memoized export for performance optimization
+export const BookingCard = memo(BookingCardComponent);
+
 /**
  * Compact Booking Card for lists
  */
@@ -148,7 +152,7 @@ interface CompactBookingCardProps {
   onPress?: () => void;
 }
 
-export function CompactBookingCard({
+function CompactBookingCardComponent({
   shopName,
   shopImage,
   status,
@@ -158,14 +162,14 @@ export function CompactBookingCard({
   totalPrice,
   onPress,
 }: CompactBookingCardProps) {
-  const formatDate = (dateStr: string) => {
+  const formatDate = useCallback((dateStr: string) => {
     const d = new Date(dateStr);
     return `${d.getDate()}/${d.getMonth() + 1}`;
-  };
+  }, []);
 
-  const formatPrice = (amount: number) => {
+  const formatPrice = useCallback((amount: number) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
-  };
+  }, []);
 
   return (
     <Pressable
@@ -174,6 +178,8 @@ export function CompactBookingCard({
       style={({ pressed }) => ({
         opacity: pressed ? 0.95 : 1,
       })}
+      accessibilityRole="button"
+      accessibilityLabel={`Đặt lịch tại ${shopName}, ${formatDate(date)} lúc ${time}`}
     >
       <Avatar source={shopImage} name={shopName} size="md" />
 
@@ -195,3 +201,6 @@ export function CompactBookingCard({
     </Pressable>
   );
 }
+
+// Memoized export for performance optimization
+export const CompactBookingCard = memo(CompactBookingCardComponent);

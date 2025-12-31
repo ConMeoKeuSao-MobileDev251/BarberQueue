@@ -20,6 +20,8 @@ interface ButtonProps {
   fullWidth?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 const sizeStyles = {
@@ -44,6 +46,8 @@ export function Button({
   fullWidth = false,
   leftIcon,
   rightIcon,
+  accessibilityLabel,
+  accessibilityHint,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
 
@@ -106,6 +110,17 @@ export function Button({
     </View>
   );
 
+  // Common accessibility props
+  const a11yProps = {
+    accessibilityRole: "button" as const,
+    accessibilityLabel: accessibilityLabel || (typeof children === "string" ? children : undefined),
+    accessibilityHint,
+    accessibilityState: {
+      disabled: isDisabled,
+      busy: loading,
+    },
+  };
+
   // Gradient button wrapper
   if (variant === "gradient" && !isDisabled) {
     return (
@@ -117,6 +132,7 @@ export function Button({
           opacity: pressed ? 0.9 : 1,
           transform: [{ scale: pressed ? 0.98 : 1 }],
         })}
+        {...a11yProps}
       >
         <LinearGradient
           colors={[...gradients.primary]}
@@ -139,6 +155,7 @@ export function Button({
         opacity: pressed ? 0.9 : 1,
         transform: [{ scale: pressed ? 0.98 : 1 }],
       })}
+      {...a11yProps}
     >
       {content}
     </Pressable>

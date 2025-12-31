@@ -2,6 +2,7 @@
  * Shop Card Component
  * Displays a barbershop with image, name, rating, and location
  */
+import { memo } from "react";
 import { View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,7 +24,7 @@ interface ShopCardProps {
   variant?: "large" | "compact";
 }
 
-export function ShopCard({
+function ShopCardComponent({
   name,
   address,
   rating = 0,
@@ -168,3 +169,6 @@ export function ShopCard({
     </Pressable>
   );
 }
+
+// Memoized export for performance optimization
+export const ShopCard = memo(ShopCardComponent);

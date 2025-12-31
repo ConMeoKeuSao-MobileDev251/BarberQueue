@@ -10,6 +10,8 @@
     "edit": "Sửa",
     "back": "Quay lại",
     "next": "Tiếp tục",
+    "continue": "Tiếp tục",
+    "skip": "Bỏ qua",
     "done": "Hoàn tất",
     "search": "Tìm kiếm",
     "seeAll": "Xem tất cả"
@@ -30,12 +32,18 @@
     "logoutConfirm": "Bạn có chắc muốn đăng xuất?"
   },
   "onboarding": {
-    "slide1Title": "Đặt lịch dễ dàng",
-    "slide1Desc": "Tìm và đặt lịch tại các barbershop hàng đầu gần bạn",
-    "slide2Title": "Chọn thợ ưu thích",
-    "slide2Desc": "Xem portfolio và đánh giá để chọn thợ phù hợp nhất",
-    "slide3Title": "Thanh toán tiện lợi",
-    "slide3Desc": "Nhiều phương thức thanh toán an toàn và nhanh chóng",
+    "slide1": {
+      "title": "Đặt lịch dễ dàng",
+      "description": "Tìm và đặt lịch tại các barbershop hàng đầu gần bạn"
+    },
+    "slide2": {
+      "title": "Chọn thợ ưu thích",
+      "description": "Xem portfolio và đánh giá để chọn thợ phù hợp nhất"
+    },
+    "slide3": {
+      "title": "Thanh toán tiện lợi",
+      "description": "Nhiều phương thức thanh toán an toàn và nhanh chóng"
+    },
     "getStarted": "Bắt đầu ngay"
   },
   "home": {

@@ -20,6 +20,14 @@ export const bookingsApi = {
   },
 
   /**
+   * Get a booking by ID
+   */
+  getById: async (id: number): Promise<Booking> => {
+    const response = await apiClient.get<Booking>(`/booking/${id}`);
+    return response.data;
+  },
+
+  /**
    * Get booking history for a user
    * @param role - 'client' or 'staff'
    * @param userId - User ID

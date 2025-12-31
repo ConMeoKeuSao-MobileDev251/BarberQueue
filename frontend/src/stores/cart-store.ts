@@ -14,22 +14,22 @@ interface CartState {
   staffName: string | null;
   dateTime: string | null;
 
-  // Computed
-  total: () => number;
-  totalDuration: () => number;
-  itemCount: () => number;
+  // Computed getters
+  readonly totalPrice: number;
+  readonly totalDuration: number;
+  readonly totalItems: number;
 
   // Actions
   addItem: (service: Service) => void;
   removeItem: (serviceId: number) => void;
   updateQuantity: (serviceId: number, quantity: number) => void;
   setBranch: (branchId: number, branchName: string) => void;
-  setStaff: (staffId: number, staffName: string) => void;
+  setStaff: (staffId: number | null, staffName: string) => void;
   setDateTime: (dateTime: string) => void;
-  clear: () => void;
+  clearCart: () => void;
 }
 
-export const useCartStore = create<CartState>((set, get) => ({
+export const useCartStore = create<CartState>()((set, get) => ({
   // Initial state
   items: [],
   branchId: null,
@@ -38,24 +38,22 @@ export const useCartStore = create<CartState>((set, get) => ({
   staffName: null,
   dateTime: null,
 
-  // Computed: total price
-  total: () => {
+  // Computed getters
+  get totalPrice() {
     return get().items.reduce(
       (sum, item) => sum + item.service.price * item.quantity,
       0
     );
   },
 
-  // Computed: total duration in minutes
-  totalDuration: () => {
+  get totalDuration() {
     return get().items.reduce(
       (sum, item) => sum + item.service.duration * item.quantity,
       0
     );
   },
 
-  // Computed: total item count
-  itemCount: () => {
+  get totalItems() {
     return get().items.reduce((sum, item) => sum + item.quantity, 0);
   },
 
@@ -119,7 +117,7 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   // Clear cart
-  clear: () => {
+  clearCart: () => {
     set({
       items: [],
       branchId: null,
@@ -133,5 +131,5 @@ export const useCartStore = create<CartState>((set, get) => ({
 
 // Selector hooks
 export const useCartItems = () => useCartStore((state) => state.items);
-export const useCartTotal = () => useCartStore((state) => state.total());
-export const useCartItemCount = () => useCartStore((state) => state.itemCount());
+export const useCartTotal = () => useCartStore((state) => state.totalPrice);
+export const useCartItemCount = () => useCartStore((state) => state.totalItems);
