@@ -5,6 +5,7 @@ import { LoginReqDto, AuthResponseDto, RegisterDto, ClientRegisterDto, StaffOrOw
 import { SkipAuth } from 'src/decorators/public.decorator';
 import { Request } from 'express';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { CurrentUserDto } from 'src/dtos/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -44,10 +45,19 @@ export class AuthController {
     return await this.authService.login(loginDto)
   }
 
+  @ApiOperation({ summary: "Logout user" })
+  @Post('logout')
+  @ApiBearerAuth()
+  async logout(@Req() req: Request) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    return await this.authService.logout(token);
+  }
+
   @Get('/me')
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get profile of logged in user" })
-  async getProfile(@CurrentUser() user) {
+  async getProfile(@CurrentUser() user: CurrentUserDto) {
     return user;
   }
 }

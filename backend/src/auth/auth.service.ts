@@ -4,7 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt'
 import { User } from 'generated/prisma';
 import { JwtService } from '@nestjs/jwt';
-import e from 'express';
+import { tokenBlacklist } from './blacklist.store';
 
 @Injectable()
 export class AuthService {
@@ -155,5 +155,20 @@ export class AuthService {
             throw new InternalServerErrorException('Error when logging in', error);
         }
 
+    }
+
+    async logout(token: string | undefined) {
+        if (!token) {
+            throw new BadRequestException({
+                status: HttpStatus.BAD_REQUEST,
+                message: 'Authorization token is missing'
+            });
+        }
+
+        tokenBlacklist.add(token);
+
+        return {
+            message: 'User logged out successfully'
+        };
     }
 }

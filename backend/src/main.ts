@@ -1,7 +1,6 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { JwtGuard } from './auth/jwt.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

@@ -14,6 +14,9 @@ import { JwtGuard } from './auth/jwt.guard';
 import { RolesGuard } from './auth/roles.guard';
 import { BookingModule } from './booking/booking.module';
 import { BookingServiceModule } from './booking_service/booking_service.module';
+import { ReviewModule } from './review/review.module';
+import { FavoriteModule } from './favorite/favorite.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { BookingServiceModule } from './booking_service/booking_service.module';
     AddressModule,
     BookingModule,
     BookingServiceModule,
+    ReviewModule,
+    FavoriteModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

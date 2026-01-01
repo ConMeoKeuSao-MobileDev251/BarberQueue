@@ -7,6 +7,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { Role } from 'src/enums/role.enum';
 
 export class CreateUserDto {
   @ApiProperty({ example: '0123456789', description: "User's phone number" })
@@ -43,7 +44,7 @@ export class CreateUserDto {
   @ApiProperty({ example: 'client', description: "user's role" })
   @IsNotEmpty()
   @IsString()
-  role: string;
+  role: Role;
 }
 
 export class UserResponseDto {
@@ -63,7 +64,7 @@ export class UserResponseDto {
   email: string;
 
   @ApiProperty({ example: 'client', description: "user's role" })
-  role: string;
+  role: Role;
 
   @ApiProperty({
     example: '12',
@@ -98,5 +99,5 @@ export class CurrentUserDto {
   userId: number
   fullName: string
   phoneNumber: string
-  role: string
+  role: Role
 }

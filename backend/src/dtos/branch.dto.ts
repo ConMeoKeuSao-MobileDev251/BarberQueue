@@ -55,3 +55,26 @@ export class CreateBranchDto {
     @Type(() => Number)
     addressId: number
 }
+
+export class BranchResponseDto extends CreateBranchDto {
+    @ApiProperty({
+        description: "branch's id",
+        example: 1
+    })
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    id: number
+
+    @ApiProperty({
+        description: "branch's created at timestamp",
+        example: new Date()
+    })
+    createdAt: Date
+
+    @ApiProperty({
+        description: "branch's updated at timestamp", 
+        example: new Date()
+    })
+    updatedAt: Date
+}
