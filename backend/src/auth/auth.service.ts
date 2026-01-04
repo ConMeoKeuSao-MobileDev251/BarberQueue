@@ -179,7 +179,7 @@ export class AuthService {
 
     initBrevoClient(): TransactionalEmailsApi {
         const transactionalEmailsApi = new TransactionalEmailsApi();
-        transactionalEmailsApi.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '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');
+        transactionalEmailsApi.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
         return transactionalEmailsApi ;
     }
 
