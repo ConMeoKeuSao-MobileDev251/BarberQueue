@@ -98,6 +98,7 @@ export interface CreateServiceRequest {
 
 // ========== Booking ==========
 export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
+export type BookingStatusAction = "confirm" | "complete" | "cancel";
 
 export interface Booking {
   id: number;
@@ -161,6 +162,38 @@ export interface ReviewListResponse {
   data: Review[];
   total: number;
   page: number;
+}
+
+// ========== Favorite ==========
+export interface Favorite {
+  userId: number;
+  branchId: number;
+  createdAt: string;
+  branch: Branch;
+}
+
+export interface FavoriteListResponse {
+  data: Favorite[];
+}
+
+// ========== Notification ==========
+export type NotificationType = "system" | "booking";
+
+export interface Notification {
+  id: number;
+  userId: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface NotificationListResponse {
+  data: Notification[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ========== Pagination ==========

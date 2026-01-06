@@ -5,6 +5,7 @@ import { apiClient } from "./client";
 import type {
   Booking,
   BookingHistoryResponse,
+  BookingStatusAction,
   CreateBookingRequest,
   CreateBookingServiceRequest,
   PaginationQuery,
@@ -50,5 +51,20 @@ export const bookingsApi = {
    */
   addService: async (data: CreateBookingServiceRequest): Promise<void> => {
     await apiClient.post("/booking-service", data);
+  },
+
+  /**
+   * Change booking status
+   * @param bookingId - Booking ID
+   * @param status - New status: 'confirm' | 'complete' | 'cancel'
+   */
+  changeStatus: async (
+    bookingId: number,
+    status: BookingStatusAction
+  ): Promise<Booking> => {
+    const response = await apiClient.post<Booking>(
+      `/booking/${bookingId}/status/${status}`
+    );
+    return response.data;
   },
 };

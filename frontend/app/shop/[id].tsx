@@ -5,7 +5,7 @@
 import { View, Text, ScrollView, Pressable, Linking, Share } from "react-native";
 import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,7 +14,8 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { servicesApi } from "@/src/api/services";
 import { reviewsApi } from "@/src/api/reviews";
-import { useCartStore } from "@/src/stores";
+import { favoritesApi } from "@/src/api/favorites";
+import { useCartStore, useAuthStore } from "@/src/stores";
 import type { Service, Review } from "@/src/types";
 import { Rating } from "@/src/components/ui/rating";
 import { Badge } from "@/src/components/ui/badge";
@@ -37,12 +38,53 @@ export default function ShopDetailsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  const branchId = parseInt(id || "0");
 
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Auth store - check if user is client
+  const { user, isAuthenticated } = useAuthStore();
+  const isClient = isAuthenticated && user?.role === "client";
 
   // Cart store
   const { items, addItem, removeItem, setBranch, totalItems, totalPrice } = useCartStore();
+
+  // Fetch user favorites
+  const { data: favoritesData } = useQuery({
+    queryKey: ["favorites"],
+    queryFn: favoritesApi.getAll,
+    enabled: isClient,
+  });
+
+  // Check if this branch is favorited
+  const isFavorite = favoritesData?.data?.some((f) => f.branchId === branchId) ?? false;
+
+  // Add favorite mutation
+  const addFavoriteMutation = useMutation({
+    mutationFn: favoritesApi.add,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+    },
+  });
+
+  // Remove favorite mutation
+  const removeFavoriteMutation = useMutation({
+    mutationFn: favoritesApi.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+    },
+  });
+
+  // Toggle favorite handler
+  const handleToggleFavorite = () => {
+    if (!isClient) return;
+    if (isFavorite) {
+      removeFavoriteMutation.mutate(branchId);
+    } else {
+      addFavoriteMutation.mutate(branchId);
+    }
+  };
 
   // Fetch services
   const { data: services, isLoading } = useQuery({
@@ -51,7 +93,6 @@ export default function ShopDetailsScreen() {
   });
 
   // Fetch reviews for this branch
-  const branchId = parseInt(id || "0");
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
     queryKey: ["reviews", "branch", branchId],
     queryFn: () => reviewsApi.getByBranchId(branchId, { page: 1, limit: 5 }),
@@ -162,14 +203,19 @@ export default function ShopDetailsScreen() {
               </View>
             </View>
 
-            {/* Favorite Button */}
-            <Pressable onPress={() => setIsFavorite(!isFavorite)}>
-              <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={24}
-                color={isFavorite ? colors.coral : colors.textSecondary}
-              />
-            </Pressable>
+            {/* Favorite Button - only show for clients */}
+            {isClient && (
+              <Pressable
+                onPress={handleToggleFavorite}
+                disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
+              >
+                <Ionicons
+                  name={isFavorite ? "heart" : "heart-outline"}
+                  size={24}
+                  color={isFavorite ? colors.coral : colors.textSecondary}
+                />
+              </Pressable>
+            )}
           </View>
 
           {/* Action Row */}
