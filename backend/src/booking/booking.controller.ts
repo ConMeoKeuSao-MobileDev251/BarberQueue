@@ -26,11 +26,12 @@ export class BookingController {
 
 
 
-  @ApiOperation({ summary: 'get history bookings by user role and id' })
+  @ApiOperation({ summary: 'get history bookings' })
   @ApiResponse({
     description: 'Bookings retrieved successfully',
     type: [BookingResponseDto]
   })
+  @Roles(Role.CLIENT, Role.STAFF)
   @Get('/history')
   async getHistory(
     @Query('page', ParseIntPipe) page: number,
