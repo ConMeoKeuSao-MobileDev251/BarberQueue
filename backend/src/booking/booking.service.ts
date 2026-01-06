@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateBookingDto } from 'src/dtos/booking.dto';
 import { CurrentUserDto } from 'src/dtos/user.dto';
+import { BookingStatus } from 'src/enums/booking.enum';
 import { Role } from 'src/enums/role.enum';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -100,6 +101,37 @@ export class BookingService {
             return bookings;
         } catch (error) {
             console.error(error);
+            if (!(error instanceof InternalServerErrorException)) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Internal Server Error');
+        }
+    }
+
+    async changeStatus(
+        bookingId: number, 
+        status: BookingStatus,
+        user: CurrentUserDto
+    ) {
+        try {
+            const existingBooking = await this.prismaService.booking.findUnique({
+                where: { id: bookingId }
+            });
+            if (!existingBooking) {
+                throw new BadRequestException({
+                    message: `Booking with id ${bookingId} does not exist`
+                });
+            }
+
+            if (user.userId !== existingBooking.staffId && user.userId !== existingBooking.clientId) {
+                throw new ForbiddenException('You do not have permission to change the status of this booking');
+            }
+
+            return await this.prismaService.booking.update({
+                where: { id: bookingId },
+                data: { status: status }
+            });
+        } catch (error) {
             if (!(error instanceof InternalServerErrorException)) {
                 throw error;
             }

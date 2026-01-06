@@ -1,13 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Type } from "class-transformer"
-import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { IsDate, IsInt, IsNotEmpty, IsNumber } from "class-validator"
 
 export class CreateBookingDto {
-    @ApiProperty({ example: 'pending', description: "Booking's status" })
-    @IsNotEmpty()
-    @IsString()
-    status: string
-
     @ApiProperty({ example: new Date(), description: "Booking's start time" })
     @IsNotEmpty()
     @IsDate()
@@ -34,13 +29,33 @@ export class CreateBookingDto {
 
     @ApiProperty({ example: 1, description: "Client's Id" })
     @IsNotEmpty()
-    @IsNumber()
+    @IsInt()
     @Type(() => Number)
     clientId: number
 
     @ApiProperty({ example: 2, description: "Staff's Id" })
     @IsNotEmpty()
-    @IsNumber()
+    @IsInt()
     @Type(() => Number)
     staffId: number
+
+    @ApiProperty({ example: 1, description: "Branch's Id" })
+    @IsNotEmpty()
+    @IsInt()
+    @Type(() => Number)
+    branchId: number
 }
+
+export class BookingResponseDto extends CreateBookingDto{
+    @ApiProperty({ example: 1, description: "Booking's Id" })
+    id: number
+
+    @ApiProperty({ example: 1, description: "Booking's status" })
+    createdAt: Date
+
+    @ApiProperty({ example: new Date(), description: "Booking's last update time" })
+    updatedAt: Date
+
+    @ApiProperty({ example: 'comfirm', description: "Booking's status" })
+    status: string
+} 

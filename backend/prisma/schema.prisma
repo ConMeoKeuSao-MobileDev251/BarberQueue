@@ -14,6 +14,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum NotificationType {
+  system
+  booking
+}
+
+enum BookingStatus {
+  confirm
+  complete
+  cancel
+}
+
+enum Role {
+  client
+  staff
+  owner
+}
+
 model User {
   id          Int       @id @default(autoincrement())
   phoneNumber String    @unique
@@ -21,7 +38,7 @@ model User {
   fullName    String
   birthDate   DateTime?
   email       String?   @unique
-  role        String
+  role        Role
   addressId   Int
   branchId    Int?
   createdAt   DateTime  @default(now())
@@ -30,8 +47,11 @@ model User {
   address Address @relation(fields: [addressId], references: [id])
   branch  Branch? @relation(fields: [branchId], references: [id])
 
-  clientBookings Booking[] @relation("clientBookings")
-  staffBookings  Booking[] @relation("staffBookings")
+  clientBookings Booking[]      @relation("clientBookings")
+  staffBookings  Booking[]      @relation("staffBookings")
+  reviews        Review[]
+  favorites      Favorite[]
+  notifications  Notification[]
 }
 
 model Address {
@@ -53,26 +73,33 @@ model Branch {
   updatedAt   DateTime @updatedAt
 
   address Address @relation(fields: [addressId], references: [id])
-  users   User[]
+
+  users     User[]
+  reviews   Review[]
+  favorites Favorite[]
+  booking   Booking[]
 }
 
 model Booking {
-  id            Int      @id @default(autoincrement())
-  status        String
+  id            Int           @id @default(autoincrement())
+  status        BookingStatus @default(confirm)
   startAt       DateTime
   endAt         DateTime
   totalDuration Int
   totalPrice    Float
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   clientId Int
   staffId  Int
+  branchId Int
 
   bookingServices BookingService[]
+  reviews         Review[]
 
   client User @relation("clientBookings", fields: [clientId], references: [id])
   staff  User @relation("staffBookings", fields: [staffId], references: [id])
+  branch Branch @relation(fields: [branchId], references: [id])
 }
 
 model Service {
@@ -92,4 +119,42 @@ model BookingService {
   service Service @relation(fields: [serviceId], references: [id])
 
   @@id([bookingId, serviceId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  bookingId Int
+  userId    Int
+  rating    Int
+  comment   String?
+  branchId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id])
+  branch  Branch? @relation(fields: [branchId], references: [id])
+}
+
+model Favorite {
+  userId    Int
+  branchId  Int
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  branch Branch @relation(fields: [branchId], references: [id])
+
+  @@id([userId, branchId])
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  type      NotificationType @default(booking)
+  isRead    Boolean          @default(false)
+  title     String
+  message   String
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }

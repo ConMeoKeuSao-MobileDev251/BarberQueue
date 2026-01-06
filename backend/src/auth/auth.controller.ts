@@ -1,10 +1,11 @@
 import { Body, Controller, Get, HttpCode, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
-import { LoginReqDto, AuthResponseDto, RegisterDto, ClientRegisterDto, StaffOrOwnerRegisterDto } from 'src/dtos/auth.dto';
+import { LoginReqDto, AuthResponseDto, RegisterDto, ClientRegisterDto, StaffOrOwnerRegisterDto, ForgotPasswordDto, ResetPasswordDto } from 'src/dtos/auth.dto';
 import { SkipAuth } from 'src/decorators/public.decorator';
 import { Request } from 'express';
 import { CurrentUser } from 'src/decorators/current_user.decorator';
+import { CurrentUserDto } from 'src/dtos/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -44,10 +45,34 @@ export class AuthController {
     return await this.authService.login(loginDto)
   }
 
+  @SkipAuth()
+  @ApiOperation({summary: "Forgot password", security: []})
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return await this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @SkipAuth()
+  @ApiOperation({summary: "Reset password", security: []})
+  @Post('reset-password')
+  async resetPassword(@Body() resetPassword: ResetPasswordDto) {
+    return await this.authService.resetPassword(resetPassword);
+  }
+
+
+  @ApiOperation({ summary: "Logout user" })
+  @Post('logout')
+  @ApiBearerAuth()
+  async logout(@Req() req: Request) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    return await this.authService.logout(token);
+  }
+
   @Get('/me')
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get profile of logged in user" })
-  async getProfile(@CurrentUser() user) {
+  async getProfile(@CurrentUser() user: CurrentUserDto) {
     return user;
   }
 }
