@@ -1,6 +1,6 @@
 import { ApiProperty, OmitType, PickType } from "@nestjs/swagger";
 import { CreateUserDto } from "./user.dto";
-import { IsInt, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { Type } from "class-transformer";
 
 export class RegisterDto extends CreateUserDto{
@@ -70,3 +70,12 @@ export class AuthResponseDto {
 }
 
 export class LoginReqDto extends PickType(CreateUserDto, ['phoneNumber', 'password']) {}
+
+export class ForgotPasswordDto extends PickType(CreateUserDto, ['email']) {}
+
+export class ResetPasswordDto extends PickType(CreateUserDto, ['password']) {
+    @ApiProperty({ example: 'some-reset-token', description: 'the reset token sent to user email' })
+    @IsNotEmpty({ message: 'Token là bắt buộc' })
+    @IsString()
+    resetToken: string
+}
