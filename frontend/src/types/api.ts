@@ -22,6 +22,15 @@ export interface RegisterClientRequest {
   address?: CreateAddressRequest;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  password: string;
+  resetToken: string;
+}
+
 // ========== User ==========
 export type UserRole = "client" | "staff" | "owner";
 
@@ -126,6 +135,32 @@ export interface BookingHistoryResponse {
 export interface CreateBookingServiceRequest {
   bookingId: number;
   serviceId: number;
+}
+
+// ========== Review ==========
+export interface Review {
+  id: number;
+  bookingId: number;
+  branchId: number | null;
+  userId: number;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: User;
+}
+
+export interface CreateReviewRequest {
+  bookingId: number;
+  branchId?: number;
+  rating: number;
+  comment?: string;
+}
+
+export interface ReviewListResponse {
+  data: Review[];
+  total: number;
+  page: number;
 }
 
 // ========== Pagination ==========

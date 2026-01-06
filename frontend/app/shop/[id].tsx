@@ -13,8 +13,9 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { servicesApi } from "@/src/api/services";
+import { reviewsApi } from "@/src/api/reviews";
 import { useCartStore } from "@/src/stores";
-import type { Service } from "@/src/types";
+import type { Service, Review } from "@/src/types";
 import { Rating } from "@/src/components/ui/rating";
 import { Badge } from "@/src/components/ui/badge";
 import { ServiceCard } from "@/src/components/shared/service-card";
@@ -47,6 +48,14 @@ export default function ShopDetailsScreen() {
   const { data: services, isLoading } = useQuery({
     queryKey: ["services"],
     queryFn: servicesApi.getAll,
+  });
+
+  // Fetch reviews for this branch
+  const branchId = parseInt(id || "0");
+  const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
+    queryKey: ["reviews", "branch", branchId],
+    queryFn: () => reviewsApi.getByBranchId(branchId, { page: 1, limit: 5 }),
+    enabled: branchId > 0,
   });
 
   // Check if service is in cart
@@ -242,6 +251,71 @@ export default function ShopDetailsScreen() {
                   inCart={isInCart(service.id)}
                 />
               ))}
+            </View>
+          )}
+        </View>
+
+        {/* Reviews Section */}
+        <View className="px-4 mt-6">
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-text-primary text-lg font-montserrat-semibold">
+              {t("shop.reviews")}
+            </Text>
+            {reviewsData && reviewsData.total > 0 && (
+              <Text className="text-text-secondary text-sm font-montserrat-regular">
+                {reviewsData.total} đánh giá
+              </Text>
+            )}
+          </View>
+
+          {isLoadingReviews ? (
+            <View className="bg-white rounded-xl p-4">
+              <Text className="text-text-secondary text-sm font-montserrat-regular">
+                Đang tải đánh giá...
+              </Text>
+            </View>
+          ) : reviewsData?.data && reviewsData.data.length > 0 ? (
+            <View className="gap-3">
+              {reviewsData.data.map((review: Review) => (
+                <View key={review.id} className="bg-white rounded-xl p-4">
+                  <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-row items-center">
+                      <View className="w-8 h-8 rounded-full bg-primary-light items-center justify-center">
+                        <Text className="text-primary text-sm font-montserrat-bold">
+                          {review.user?.fullName?.charAt(0) || "U"}
+                        </Text>
+                      </View>
+                      <Text className="text-text-primary text-sm font-montserrat-medium ml-2">
+                        {review.user?.fullName || "Khách hàng"}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Ionicons
+                          key={star}
+                          name={star <= review.rating ? "star" : "star-outline"}
+                          size={14}
+                          color={star <= review.rating ? colors.rating : colors.textSecondary}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                  {review.comment && (
+                    <Text className="text-text-secondary text-sm font-montserrat-regular">
+                      {review.comment}
+                    </Text>
+                  )}
+                  <Text className="text-text-tertiary text-xs font-montserrat-regular mt-2">
+                    {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View className="bg-white rounded-xl p-4">
+              <Text className="text-text-secondary text-sm font-montserrat-regular text-center">
+                Chưa có đánh giá nào
+              </Text>
             </View>
           )}
         </View>

@@ -5,6 +5,7 @@
 import { create } from "zustand";
 import type { User, UserRole } from "../types";
 import { clearAuthData, saveAuthData } from "../api/client";
+import { authApi } from "../api/auth";
 
 interface AuthState {
   // State
@@ -38,8 +39,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
-  // Clear authentication
+  // Clear authentication (invalidate token server-side first)
   logout: async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Continue with local logout even if API fails
+    }
     await clearAuthData();
     set({
       user: null,
