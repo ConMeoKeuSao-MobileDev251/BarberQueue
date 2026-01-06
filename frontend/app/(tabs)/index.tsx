@@ -10,6 +10,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
+import { Image } from "expo-image";
+
 import { branchesApi } from "@/src/api/branches";
 import { useAuthStore } from "@/src/stores";
 import { useLocation } from "@/src/hooks";
@@ -20,6 +22,10 @@ import { FilterChips } from "@/src/components/shared/filter-chips";
 import { SkeletonShopCard } from "@/src/components/ui/skeleton";
 import { EmptySearchResults } from "@/src/components/ui/empty-state";
 import { colors } from "@/src/constants/theme";
+
+// Local assets
+const logoImage = require("../../assets/barberQueue_logo.png");
+const couponImage = require("../../assets/images/coupon-image.png");
 
 // Filter options
 const filterOptions = [
@@ -92,10 +98,11 @@ export default function HomeScreen() {
 
           {/* Logo */}
           <View className="flex-row items-center">
-            <Ionicons name="cut" size={24} color={colors.primary} />
-            <Text className="text-primary text-lg font-montserrat-bold ml-2">
-              BarberQueue
-            </Text>
+            <Image
+              source={logoImage}
+              style={{ width: 120, height: 32 }}
+              contentFit="contain"
+            />
           </View>
 
           {/* Notification Bell */}
@@ -172,14 +179,23 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {/* Promo Card Placeholder */}
-          <View className="bg-primary rounded-xl p-4 h-32 justify-end">
-            <Text className="text-white text-lg font-montserrat-bold">
-              Giảm 20% lần đầu
-            </Text>
-            <Text className="text-white/80 text-sm font-montserrat-regular mt-1">
-              Áp dụng cho tất cả dịch vụ
-            </Text>
+          {/* Promo Card */}
+          <View className="rounded-xl h-32 overflow-hidden relative">
+            <Image
+              source={couponImage}
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
+            />
+            {/* Overlay gradient for text readability */}
+            <View className="absolute inset-0 bg-black/30" />
+            <View className="absolute bottom-0 left-0 right-0 p-4">
+              <Text className="text-white text-lg font-montserrat-bold">
+                Giảm 20% lần đầu
+              </Text>
+              <Text className="text-white/80 text-sm font-montserrat-regular mt-1">
+                Áp dụng cho tất cả dịch vụ
+              </Text>
+            </View>
           </View>
         </View>
 

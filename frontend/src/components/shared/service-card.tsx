@@ -13,7 +13,7 @@ interface ServiceCardProps {
   name: string;
   price: number;
   duration: number; // in minutes
-  image?: string | null;
+  image?: string | number | null; // Accept both URI (string) and require() (number)
   description?: string;
   onPress?: () => void;
   onAddToCart?: () => void;
@@ -57,7 +57,7 @@ function ServiceCardComponent({
         <View className="w-24 h-24">
           {image ? (
             <Image
-              source={{ uri: image }}
+              source={typeof image === "number" ? image : { uri: image }}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
               transition={200}
@@ -129,7 +129,7 @@ function ServiceCardComponent({
       <View className="h-28">
         {image ? (
           <Image
-            source={{ uri: image }}
+            source={typeof image === "number" ? image : { uri: image }}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
             transition={200}

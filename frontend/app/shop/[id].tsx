@@ -23,6 +23,10 @@ import { ServiceCard } from "@/src/components/shared/service-card";
 import { CategoryTabs } from "@/src/components/shared/filter-chips";
 import { SkeletonServiceCard } from "@/src/components/ui/skeleton";
 import { colors } from "@/src/constants/theme";
+import { getServiceIcon } from "@/src/constants/service-icons";
+
+// Local assets
+const shopHeroImage = require("../../assets/images/shop-hero-image.png");
 
 // Service categories
 const categories = [
@@ -155,7 +159,7 @@ export default function ShopDetailsScreen() {
         {/* Hero Image */}
         <View className="relative h-64">
           <Image
-            source={{ uri: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=800" }}
+            source={shopHeroImage}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
           />
@@ -290,7 +294,7 @@ export default function ShopDetailsScreen() {
                   name={service.name}
                   price={service.price}
                   duration={service.duration}
-                  image={null}
+                  image={getServiceIcon(service.name)}
                   variant="horizontal"
                   onPress={() => {}}
                   onAddToCart={() => handleToggleCart(service)}
