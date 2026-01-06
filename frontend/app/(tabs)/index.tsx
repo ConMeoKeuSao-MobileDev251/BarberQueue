@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { branchesApi } from "@/src/api/branches";
 import { useAuthStore } from "@/src/stores";
+import { useLocation } from "@/src/hooks";
 import { Avatar } from "@/src/components/ui/avatar";
 import { SearchInput } from "@/src/components/ui/search-input";
 import { ShopCard } from "@/src/components/shared/shop-card";
@@ -19,12 +20,6 @@ import { FilterChips } from "@/src/components/shared/filter-chips";
 import { SkeletonShopCard } from "@/src/components/ui/skeleton";
 import { EmptySearchResults } from "@/src/components/ui/empty-state";
 import { colors } from "@/src/constants/theme";
-
-// Default location (Ho Chi Minh City center)
-const DEFAULT_LOCATION = {
-  latitude: 10.7769,
-  longitude: 106.7009,
-};
 
 // Filter options
 const filterOptions = [
@@ -42,25 +37,31 @@ export default function HomeScreen() {
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch nearby branches
+  // Get user's current location
+  const {
+    coords,
+    locationName,
+    isLoading: locationLoading,
+    refresh: refreshLocation,
+  } = useLocation();
+
+  // Fetch nearby branches - starts with default location, auto-refetches when real location arrives
   const {
     data: branches,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["branches", DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude],
+    queryKey: ["branches", coords.latitude, coords.longitude],
     queryFn: () =>
-      branchesApi.searchByLocation(
-        DEFAULT_LOCATION.latitude,
-        DEFAULT_LOCATION.longitude
-      ),
+      branchesApi.searchByLocation(coords.latitude, coords.longitude),
   });
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    await refreshLocation();
     await refetch();
     setRefreshing(false);
-  }, [refetch]);
+  }, [refetch, refreshLocation]);
 
   const handleSearchPress = () => {
     router.push("/(tabs)/search" as never);
@@ -115,10 +116,13 @@ export default function HomeScreen() {
         </Text>
 
         {/* Location Selector */}
-        <Pressable className="flex-row items-center mt-2">
+        <Pressable
+          className="flex-row items-center mt-2"
+          onPress={refreshLocation}
+        >
           <Ionicons name="location-outline" size={16} color={colors.primary} />
           <Text className="text-primary text-sm font-montserrat-medium ml-1">
-            Quận 1, TP.HCM
+            {locationLoading ? "Đang xác định..." : locationName || "TP. Hồ Chí Minh"}
           </Text>
           <Ionicons name="chevron-down" size={16} color={colors.primary} />
         </Pressable>
