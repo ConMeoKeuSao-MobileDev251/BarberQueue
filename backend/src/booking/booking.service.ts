@@ -53,43 +53,27 @@ export class BookingService {
     }
 
     async getHistory(
-        role: string, 
-        id: number, 
         page: number, 
         limit: number,
         user: CurrentUserDto
     ) {
         try {
-            if (user.role !== Role.OWNER && user.userId !== id){
-                throw new ForbiddenException({
-                    status: HttpStatus.FORBIDDEN,
-                    message: 'You do not have permission to access this resource'
-                })
-            }
-
-            const existingUser = await this.prismaService.user.findUnique({ where: { id } });
+            const existingUser = await this.prismaService.user.findUnique({ where: { id: user.userId } });
 
             if (!existingUser) {  
                 throw new BadRequestException({
                     status: HttpStatus.BAD_REQUEST,
-                    message: `User with id ${id} does not exist`
-                });
-            }
-
-            if (role !== existingUser.role) {
-                throw new BadRequestException({
-                    status: HttpStatus.BAD_REQUEST,
-                    message: `User with id ${id} does not have role ${role}`
+                    message: `User with id ${user.userId} does not exist`
                 });
             }
 
             const skip = (page - 1) * limit;
             let whereCondition = {};
 
-            if (role === Role.CLIENT) {
-                whereCondition = { clientId: id };
-            } else if (role === Role.STAFF) {
-                whereCondition = { staffId: id };
+            if (user.role === Role.CLIENT) {
+                whereCondition = { clientId: user.userId };
+            } else if (user.role === Role.STAFF) {
+                whereCondition = { staffId: user.userId };
             }
 
             const bookings = await this.prismaService.booking.findMany({

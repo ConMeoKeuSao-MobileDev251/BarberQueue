@@ -31,15 +31,13 @@ export class BookingController {
     description: 'Bookings retrieved successfully',
     type: [BookingResponseDto]
   })
-  @Get('/:role/:id/history')
+  @Get('/history')
   async getHistory(
-    @Param('role') role: Role,
-    @Param('id', ParseIntPipe) id: number,
     @Query('page', ParseIntPipe) page: number,
     @Query('limit', ParseIntPipe) limit: number,
     @CurrentUser() user: CurrentUserDto
    ) {
-    return await this.bookingService.getHistory(role, id, page, limit, user);
+    return await this.bookingService.getHistory(page, limit, user);
   }
 
   @ApiOperation({ summary: 'change booking status' })
