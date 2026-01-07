@@ -16,6 +16,7 @@ import { branchesApi } from "@/src/api/branches";
 import { useAuthStore } from "@/src/stores";
 import { useLocation } from "@/src/hooks";
 import { Avatar } from "@/src/components/ui/avatar";
+import { BarberQueueLogo } from "@/src/components/ui/barberqueue-logo";
 import { SearchInput } from "@/src/components/ui/search-input";
 import { ShopCard } from "@/src/components/shared/shop-card";
 import { FilterChips } from "@/src/components/shared/filter-chips";
@@ -24,7 +25,6 @@ import { EmptySearchResults } from "@/src/components/ui/empty-state";
 import { colors } from "@/src/constants/theme";
 
 // Local assets
-const logoImage = require("../../assets/barberQueue_logo.png");
 const couponImage = require("../../assets/images/coupon-image.png");
 
 // Filter options
@@ -97,13 +97,7 @@ export default function HomeScreen() {
           />
 
           {/* Logo */}
-          <View className="flex-row items-center">
-            <Image
-              source={logoImage}
-              style={{ width: 120, height: 32 }}
-              contentFit="contain"
-            />
-          </View>
+          <BarberQueueLogo size="md" />
 
           {/* Notification Bell */}
           <Pressable
