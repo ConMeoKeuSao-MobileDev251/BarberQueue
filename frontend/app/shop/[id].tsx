@@ -20,22 +20,12 @@ import type { Service, Review } from "@/src/types";
 import { Rating } from "@/src/components/ui/rating";
 import { Badge } from "@/src/components/ui/badge";
 import { ServiceCard } from "@/src/components/shared/service-card";
-import { CategoryTabs } from "@/src/components/shared/filter-chips";
 import { SkeletonServiceCard } from "@/src/components/ui/skeleton";
 import { colors } from "@/src/constants/theme";
 import { getServiceIcon } from "@/src/constants/service-icons";
 
 // Local assets
 const shopHeroImage = require("../../assets/images/shop-hero-image.png");
-
-// Service categories
-const categories = [
-  { id: "all", label: "Tất cả" },
-  { id: "recommended", label: "Nên thử" },
-  { id: "combo", label: "Combo" },
-  { id: "haircut", label: "Cắt tóc" },
-  { id: "facial", label: "Chăm sóc da" },
-];
 
 export default function ShopDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,8 +34,6 @@ export default function ShopDetailsScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const branchId = parseInt(id || "0");
-
-  const [selectedCategory, setSelectedCategory] = useState("all");
 
   // Auth store - check if user is client
   const { user, isAuthenticated } = useAuthStore();
@@ -61,14 +49,23 @@ export default function ShopDetailsScreen() {
     enabled: isClient,
   });
 
-  // Check if this branch is favorited
-  const isFavorite = favoritesData?.data?.some((f) => f.branchId === branchId) ?? false;
+  // Check if this branch is favorited (API returns Favorite[] directly)
+  const isFavorite = favoritesData?.some((f) => f.branchId === branchId) ?? false;
 
   // Add favorite mutation
   const addFavoriteMutation = useMutation({
     mutationFn: favoritesApi.add,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
+    },
+    onError: (error: unknown) => {
+      // Log detailed error info for debugging
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: unknown; status?: number } };
+        console.error("Failed to add favorite:", axiosError.response?.status, axiosError.response?.data);
+      } else {
+        console.error("Failed to add favorite:", error);
+      }
     },
   });
 
@@ -77,6 +74,14 @@ export default function ShopDetailsScreen() {
     mutationFn: favoritesApi.remove,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
+    },
+    onError: (error: unknown) => {
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: unknown; status?: number } };
+        console.error("Failed to remove favorite:", axiosError.response?.status, axiosError.response?.data);
+      } else {
+        console.error("Failed to remove favorite:", error);
+      }
     },
   });
 
@@ -90,10 +95,11 @@ export default function ShopDetailsScreen() {
     }
   };
 
-  // Fetch services
+  // Fetch services (global services, branchId in key for cache isolation)
   const { data: services, isLoading } = useQuery({
-    queryKey: ["services"],
+    queryKey: ["services", "branch", branchId],
     queryFn: servicesApi.getAll,
+    enabled: branchId > 0,
   });
 
   // Fetch reviews for this branch
@@ -260,21 +266,23 @@ export default function ShopDetailsScreen() {
               </Text>
             </Pressable>
 
-            <Rating score={4.8} count={256} size="md" />
+            {/* Only show rating if there are reviews */}
+            {reviewsData && reviewsData.total > 0 && (
+              <Rating
+                score={
+                  reviewsData.data.length > 0
+                    ? reviewsData.data.reduce((sum, r) => sum + r.rating, 0) / reviewsData.data.length
+                    : 0
+                }
+                count={reviewsData.total}
+                size="md"
+              />
+            )}
           </View>
         </View>
 
-        {/* Service Categories */}
-        <View className="mt-6">
-          <CategoryTabs
-            categories={categories}
-            selected={selectedCategory}
-            onChange={setSelectedCategory}
-          />
-        </View>
-
         {/* Services List */}
-        <View className="px-4 mt-4">
+        <View className="px-4 mt-6">
           <Text className="text-text-primary text-lg font-montserrat-semibold mb-3">
             {t("shop.services")}
           </Text>
@@ -285,9 +293,15 @@ export default function ShopDetailsScreen() {
               <SkeletonServiceCard />
               <SkeletonServiceCard />
             </View>
+          ) : !services || services.length === 0 ? (
+            <View className="bg-white rounded-xl p-6">
+              <Text className="text-text-secondary text-sm font-montserrat-regular text-center">
+                Chưa có dịch vụ nào
+              </Text>
+            </View>
           ) : (
             <View className="gap-4">
-              {services?.map((service) => (
+              {services.map((service) => (
                 <ServiceCard
                   key={service.id}
                   id={service.id.toString()}

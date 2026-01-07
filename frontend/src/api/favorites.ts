@@ -2,7 +2,7 @@
  * Favorites API Functions
  */
 import { apiClient } from "./client";
-import type { Favorite, FavoriteListResponse } from "../types";
+import type { Favorite } from "../types";
 
 export const favoritesApi = {
   /**
@@ -17,11 +17,11 @@ export const favoritesApi = {
   },
 
   /**
-   * Get all user favorites
+   * Get all user favorites (returns Favorite[] directly)
    * @requires CLIENT role
    */
-  getAll: async (): Promise<FavoriteListResponse> => {
-    const response = await apiClient.get<FavoriteListResponse>("/favorite/user");
+  getAll: async (): Promise<Favorite[]> => {
+    const response = await apiClient.get<Favorite[]>("/favorite/user");
     return response.data;
   },
 
