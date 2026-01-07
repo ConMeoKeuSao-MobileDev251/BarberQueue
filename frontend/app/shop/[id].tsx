@@ -16,7 +16,7 @@ import { servicesApi } from "@/src/api/services";
 import { reviewsApi } from "@/src/api/reviews";
 import { favoritesApi } from "@/src/api/favorites";
 import { useCartStore, useAuthStore } from "@/src/stores";
-import type { Service, Review } from "@/src/types";
+import type { Service, Review, Branch } from "@/src/types";
 import { Rating } from "@/src/components/ui/rating";
 import { Badge } from "@/src/components/ui/badge";
 import { ServiceCard } from "@/src/components/shared/service-card";
@@ -28,12 +28,15 @@ import { getServiceIcon } from "@/src/constants/service-icons";
 const shopHeroImage = require("../../assets/images/shop-hero-image.png");
 
 export default function ShopDetailsScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, branchData } = useLocalSearchParams<{ id: string; branchData?: string }>();
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const branchId = parseInt(id || "0");
+
+  // Parse branch data from navigation params
+  const branch: Branch | null = branchData ? JSON.parse(branchData) : null;
 
   // Auth store - check if user is client
   const { user, isAuthenticated } = useAuthStore();
@@ -123,11 +126,17 @@ export default function ShopDetailsScreen() {
     } else {
       // Set branch if not set
       if (!useCartStore.getState().branchId) {
-        setBranch(parseInt(id || "0"), "Barbershop");
+        setBranch(branchId, branch?.name || "Barbershop");
       }
       addItem(service);
     }
   };
+
+  // Calculate average rating from reviews
+  const averageRating = reviewsData?.data && reviewsData.data.length > 0
+    ? Math.round((reviewsData.data.reduce((sum, r) => sum + r.rating, 0) / reviewsData.data.length) * 10) / 10
+    : 0;
+  const reviewCount = reviewsData?.total ?? 0;
 
   // Actions
   const handleBack = () => router.back();
@@ -135,7 +144,7 @@ export default function ShopDetailsScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: "Check out this barbershop on BarberQueue!",
+        message: `Check out ${branch?.name || "this barbershop"} on BarberQueue!`,
         url: `barberqueue://shop/${id}`,
       });
     } catch {
@@ -144,11 +153,18 @@ export default function ShopDetailsScreen() {
   };
 
   const handleCall = () => {
-    Linking.openURL("tel:+84123456789");
+    const phone = branch?.phoneNumber;
+    if (phone) {
+      Linking.openURL(`tel:${phone}`);
+    }
   };
 
   const handleDirections = () => {
-    Linking.openURL("https://maps.google.com/?q=10.7769,106.7009");
+    const lat = branch?.address?.latitude;
+    const lng = branch?.address?.longitude;
+    if (lat && lng) {
+      Linking.openURL(`https://maps.google.com/?q=${lat},${lng}`);
+    }
   };
 
   const handleContinue = () => {
@@ -201,14 +217,14 @@ export default function ShopDetailsScreen() {
         <View className="bg-white mx-4 -mt-8 rounded-xl p-4 shadow-md relative z-10">
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
-              <Badge variant="primary">CẮT TÓC NAM</Badge>
+              <Badge variant="primary">BARBERSHOP</Badge>
               <Text className="text-text-primary text-xl font-montserrat-bold mt-2">
-                Barbershop Premium
+                {branch?.name || "Loading..."}
               </Text>
               <View className="flex-row items-center mt-2">
                 <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
                 <Text className="text-text-secondary text-sm font-montserrat-regular ml-1">
-                  123 Nguyễn Huệ, Quận 1 • 1.2km
+                  {branch?.address?.addressText || "..."}
                 </Text>
               </View>
             </View>
@@ -267,14 +283,10 @@ export default function ShopDetailsScreen() {
             </Pressable>
 
             {/* Only show rating if there are reviews */}
-            {reviewsData && reviewsData.total > 0 && (
+            {reviewCount > 0 && (
               <Rating
-                score={
-                  reviewsData.data.length > 0
-                    ? reviewsData.data.reduce((sum, r) => sum + r.rating, 0) / reviewsData.data.length
-                    : 0
-                }
-                count={reviewsData.total}
+                score={averageRating}
+                count={reviewCount}
                 size="md"
               />
             )}

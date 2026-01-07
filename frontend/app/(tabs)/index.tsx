@@ -14,6 +14,7 @@ import { Image } from "expo-image";
 
 import { branchesApi } from "@/src/api/branches";
 import { useAuthStore } from "@/src/stores";
+import type { Branch } from "@/src/types";
 import { useLocation } from "@/src/hooks";
 import { Avatar } from "@/src/components/ui/avatar";
 import { BarberQueueLogo } from "@/src/components/ui/barberqueue-logo";
@@ -73,8 +74,11 @@ export default function HomeScreen() {
     router.push("/(tabs)/search" as never);
   };
 
-  const handleShopPress = (branchId: number) => {
-    router.push(`/shop/${branchId}` as never);
+  const handleShopPress = (branch: Branch) => {
+    router.push({
+      pathname: `/shop/${branch.id}`,
+      params: { branchData: JSON.stringify(branch) },
+    } as never);
   };
 
   const handleNotificationPress = () => {
@@ -225,7 +229,7 @@ export default function HomeScreen() {
                   reviewCount={120}
                   image={null}
                   isOpen={true}
-                  onPress={() => handleShopPress(branch.id)}
+                  onPress={() => handleShopPress(branch)}
                 />
               ))}
             </View>
