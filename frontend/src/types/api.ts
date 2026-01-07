@@ -99,7 +99,7 @@ export interface CreateServiceRequest {
 }
 
 // ========== Booking ==========
-export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
+export type BookingStatus = "pending" | "confirm" | "confirmed" | "completed" | "cancelled";
 export type BookingStatusAction = "confirm" | "complete" | "cancel";
 
 export interface Booking {
@@ -119,21 +119,17 @@ export interface Booking {
 }
 
 export interface CreateBookingRequest {
-  status: BookingStatus;
   startAt: string;
   endAt: string;
   totalDuration: number;
   totalPrice: number;
   clientId: number;
   staffId: number;
+  branchId: number;
 }
 
-export interface BookingHistoryResponse {
-  data: Booking[];
-  total: number;
-  page: number;
-  limit: number;
-}
+// API returns array directly
+export type BookingHistoryResponse = Booking[];
 
 export interface CreateBookingServiceRequest {
   bookingId: number;

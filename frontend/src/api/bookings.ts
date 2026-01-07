@@ -4,7 +4,6 @@
 import { apiClient } from "./client";
 import type {
   Booking,
-  BookingHistoryResponse,
   BookingStatusAction,
   CreateBookingRequest,
   CreateBookingServiceRequest,
@@ -16,8 +15,16 @@ export const bookingsApi = {
    * Create a new booking
    */
   create: async (data: CreateBookingRequest): Promise<Booking> => {
-    const response = await apiClient.post<Booking>("/booking", data);
-    return response.data;
+    console.log("[bookingsApi.create] Sending request to POST /booking");
+    console.log("[bookingsApi.create] Data:", JSON.stringify(data, null, 2));
+    try {
+      const response = await apiClient.post<Booking>("/booking", data);
+      console.log("[bookingsApi.create] Response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("[bookingsApi.create] Error:", error);
+      throw error;
+    }
   },
 
   /**
@@ -29,21 +36,21 @@ export const bookingsApi = {
   },
 
   /**
-   * Get booking history for a user
-   * @param role - 'client' or 'staff'
-   * @param userId - User ID
+   * Get booking history (filtered by authenticated user on backend)
    * @param params - Pagination params
    */
-  getHistory: async (
-    role: "client" | "staff",
-    userId: number,
-    params?: PaginationQuery
-  ): Promise<BookingHistoryResponse> => {
-    const response = await apiClient.get<BookingHistoryResponse>(
-      `/booking/${role}/${userId}/history`,
-      { params }
-    );
-    return response.data;
+  getHistory: async (params?: PaginationQuery): Promise<Booking[]> => {
+    console.log("[bookingsApi.getHistory] Fetching from GET /booking/history", params);
+    try {
+      const response = await apiClient.get<Booking[]>("/booking/history", {
+        params,
+      });
+      console.log("[bookingsApi.getHistory] Response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("[bookingsApi.getHistory] Error:", error);
+      throw error;
+    }
   },
 
   /**

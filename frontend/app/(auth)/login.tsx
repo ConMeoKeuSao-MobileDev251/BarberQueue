@@ -59,9 +59,9 @@ export default function LoginScreen() {
     },
     onSuccess: async (data) => {
       console.log("[Login] onSuccess - setting auth...");
-      // Construct user object from flat response
-      const user = {
-        id: 0, // Will be fetched later if needed
+      // First set auth with token so API calls are authenticated
+      const tempUser = {
+        id: 0,
         phoneNumber: data.phoneNumber,
         fullName: data.fullName,
         email: null,
@@ -71,7 +71,29 @@ export default function LoginScreen() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      await setAuth(user, data.accessToken);
+      await setAuth(tempUser, data.accessToken);
+
+      // Fetch complete user profile to get actual ID
+      try {
+        console.log("[Login] Fetching user profile...");
+        const profileResponse = await authApi.getCurrentUser();
+        console.log("[Login] User profile response:", profileResponse);
+        // Map userId to id (API returns userId, frontend expects id)
+        const fullUser = {
+          ...tempUser,
+          id: (profileResponse as { userId?: number }).userId || profileResponse.id || 0,
+          fullName: profileResponse.fullName || tempUser.fullName,
+          phoneNumber: profileResponse.phoneNumber || tempUser.phoneNumber,
+          role: profileResponse.role || tempUser.role,
+          email: profileResponse.email ?? tempUser.email,
+        };
+        console.log("[Login] Mapped user:", fullUser);
+        await setAuth(fullUser, data.accessToken);
+      } catch (error) {
+        console.error("[Login] Failed to fetch user profile:", error);
+        // Continue with temp user - booking will fail but login works
+      }
+
       showToast(t("auth.loginSuccess"), "success");
       router.replace("/(tabs)");
     },

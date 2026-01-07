@@ -42,7 +42,7 @@ export function Badge({ children, variant = "primary", size = "sm" }: BadgeProps
 /**
  * Status Badge for booking status
  */
-type StatusType = "pending" | "confirmed" | "completed" | "cancelled";
+type StatusType = "pending" | "confirm" | "confirmed" | "completed" | "cancelled";
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -50,12 +50,13 @@ interface StatusBadgeProps {
 
 const statusConfig: Record<StatusType, { label: string; variant: BadgeVariant }> = {
   pending: { label: "Chờ xác nhận", variant: "warning" },
+  confirm: { label: "Đã xác nhận", variant: "info" },
   confirmed: { label: "Đã xác nhận", variant: "info" },
   completed: { label: "Hoàn thành", variant: "success" },
   cancelled: { label: "Đã hủy", variant: "neutral" },
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] || statusConfig.pending;
   return <Badge variant={config.variant}>{config.label}</Badge>;
 }
