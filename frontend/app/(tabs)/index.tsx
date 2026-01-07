@@ -93,23 +93,36 @@ export default function HomeScreen() {
         style={{ paddingTop: insets.top + 8 }}
       >
         <View className="flex-row items-center justify-between mb-4">
-          {/* User Avatar */}
-          <Avatar
-            source={null}
-            name={user?.fullName || "User"}
-            size="md"
-          />
+          {/* User Avatar → Account */}
+          <Pressable onPress={() => router.push("/(tabs)/account")}>
+            <Avatar
+              source={null}
+              name={user?.fullName || "User"}
+              size="md"
+            />
+          </Pressable>
 
           {/* Logo */}
           <BarberQueueLogo size="md" />
 
-          {/* Notification Bell */}
-          <Pressable
-            onPress={handleNotificationPress}
-            className="w-10 h-10 items-center justify-center"
-          >
-            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
-          </Pressable>
+          {/* Right Icons */}
+          <View className="flex-row items-center gap-1">
+            {/* Bookings */}
+            <Pressable
+              onPress={() => router.push("/(tabs)/bookings")}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <Ionicons name="calendar-outline" size={24} color={colors.textPrimary} />
+            </Pressable>
+
+            {/* Notifications */}
+            <Pressable
+              onPress={handleNotificationPress}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
+            </Pressable>
+          </View>
         </View>
 
         {/* Greeting */}

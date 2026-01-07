@@ -6,11 +6,11 @@ import { View, Text, ScrollView, RefreshControl } from "react-native";
 import { useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { bookingsApi } from "@/src/api/bookings";
 import { useAuthStore } from "@/src/stores";
+import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { CategoryTabs } from "@/src/components/shared/filter-chips";
 import { BookingCard } from "@/src/components/shared/booking-card";
 import { SkeletonCard } from "@/src/components/ui/skeleton";
@@ -28,7 +28,6 @@ const tabs = [
 export default function BookingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
 
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
@@ -103,16 +102,11 @@ export default function BookingsScreen() {
 
   return (
     <View className="flex-1 bg-background-secondary">
-      {/* Header */}
-      <View
-        className="bg-white px-4 pb-4"
-        style={{ paddingTop: insets.top + 8 }}
-      >
-        <Text className="text-text-primary text-2xl font-montserrat-bold mb-4">
-          {t("booking.history")}
-        </Text>
+      {/* Header with back button */}
+      <ScreenHeader title={t("booking.history")} />
 
-        {/* Tabs */}
+      {/* Tabs */}
+      <View className="bg-white px-4 pb-4">
         <CategoryTabs
           categories={tabs}
           selected={activeTab}
