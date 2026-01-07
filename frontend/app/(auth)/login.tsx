@@ -38,7 +38,7 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const setAuth = useAuthStore((state) => state.setAuth);
 
-  const { control, handleSubmit } = useForm<LoginFormData>({
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       phoneNumber: "",
@@ -46,24 +46,53 @@ export default function LoginScreen() {
     },
   });
 
+  // Debug: Log form errors
+  console.log("[Login] Form errors:", errors);
+
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: authApi.login,
+    mutationFn: async (data: { phoneNumber: string; password: string }) => {
+      console.log("[Login] mutationFn executing with:", data);
+      const result = await authApi.login(data);
+      console.log("[Login] API response:", result);
+      return result;
+    },
     onSuccess: async (data) => {
-      await setAuth(data.user, data.access_token);
+      console.log("[Login] onSuccess - setting auth...");
+      // Construct user object from flat response
+      const user = {
+        id: 0, // Will be fetched later if needed
+        phoneNumber: data.phoneNumber,
+        fullName: data.fullName,
+        email: null,
+        role: data.role,
+        addressId: null,
+        branchId: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await setAuth(user, data.accessToken);
       showToast(t("auth.loginSuccess"), "success");
       router.replace("/(tabs)");
     },
     onError: (error: Error) => {
+      console.log("[Login] onError:", error);
       showToast(error.message || t("common.error"), "error");
     },
   });
 
   const onSubmit = (data: LoginFormData) => {
+    console.log("[Login] onSubmit called with:", data);
+    console.log("[Login] Calling loginMutation.mutate...");
     loginMutation.mutate({
       phoneNumber: data.phoneNumber,
       password: data.password,
     });
+  };
+
+  const handleLoginPress = () => {
+    console.log("[Login] Button pressed!");
+    handleSubmit(onSubmit)();
   };
 
   return (
@@ -138,7 +167,7 @@ export default function LoginScreen() {
             {/* Login Button */}
             <Button
               variant="gradient"
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleLoginPress}
               loading={loginMutation.isPending}
               fullWidth
             >

@@ -10,8 +10,10 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  access_token: string;
-  user: User;
+  accessToken: string;
+  fullName: string;
+  phoneNumber: string;
+  role: UserRole;
 }
 
 export interface RegisterClientRequest {

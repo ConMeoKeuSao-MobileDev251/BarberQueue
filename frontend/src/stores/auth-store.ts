@@ -4,7 +4,7 @@
  */
 import { create } from "zustand";
 import type { User, UserRole } from "../types";
-import { clearAuthData, saveAuthData } from "../api/client";
+import { clearAuthData, saveAuthData, getStoredAuthData } from "../api/client";
 import { authApi } from "../api/auth";
 
 interface AuthState {
@@ -19,6 +19,7 @@ interface AuthState {
   logout: () => Promise<void>;
   setLoading: (loading: boolean) => void;
   setUser: (user: User) => void;
+  restoreAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -63,6 +64,25 @@ export const useAuthStore = create<AuthState>((set) => ({
   // Update user data
   setUser: (user) => {
     set({ user });
+  },
+
+  // Restore auth from secure storage (call on app init)
+  restoreAuth: async () => {
+    try {
+      const { token, user } = await getStoredAuthData();
+      if (token && user) {
+        set({
+          user: user as User,
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } else {
+        set({ isLoading: false });
+      }
+    } catch {
+      set({ isLoading: false });
+    }
   },
 }));
 

@@ -92,3 +92,25 @@ export async function clearAuthData(): Promise<void> {
     }
   }
 }
+
+// Helper to get stored auth data (for session restoration)
+export async function getStoredAuthData(): Promise<{
+  token: string | null;
+  user: object | null;
+}> {
+  try {
+    const token = await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
+    const userDataStr = await SecureStore.getItemAsync(STORAGE_KEYS.USER_DATA);
+    const user = userDataStr ? JSON.parse(userDataStr) : null;
+    return { token, user };
+  } catch {
+    // SecureStore not available (web) - try localStorage
+    if (typeof localStorage !== "undefined") {
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const userDataStr = localStorage.getItem(STORAGE_KEYS.USER_DATA);
+      const user = userDataStr ? JSON.parse(userDataStr) : null;
+      return { token, user };
+    }
+    return { token: null, user: null };
+  }
+}
