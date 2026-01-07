@@ -2,17 +2,20 @@
  * Stylist Selection Screen
  * Choose stylist for the booking
  */
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 
 import { useCartStore } from "@/src/stores";
+import { branchesApi } from "@/src/api";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { StylistCard, AnyStylistCard } from "@/src/components/shared/stylist-card";
 import { CategoryTabs } from "@/src/components/shared/filter-chips";
 import { Button } from "@/src/components/ui/button";
+import { colors } from "@/src/constants/theme";
 
 const tabs = [
   { id: "schedule", label: "Đặt lịch" },
@@ -20,25 +23,28 @@ const tabs = [
   { id: "reviews", label: "Đánh giá" },
 ];
 
-// Mock staff data
-const mockStaff = [
-  { id: 1, name: "Minh Tuấn", specialty: "Cắt tóc nam", rating: 4.9, reviewCount: 156, isAvailable: true },
-  { id: 2, name: "Hoàng Long", specialty: "Cắt tóc & Nhuộm", rating: 4.8, reviewCount: 203, isAvailable: true },
-  { id: 3, name: "Văn Đức", specialty: "Combo", rating: 4.7, reviewCount: 89, isAvailable: false },
-  { id: 4, name: "Quốc Bảo", specialty: "Cạo râu", rating: 4.6, reviewCount: 67, isAvailable: true },
-];
-
 export default function StylistScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const { setStaff, staffId } = useCartStore();
+  const { setStaff, staffId, branchId } = useCartStore();
   const [selectedTab, setSelectedTab] = useState("schedule");
   const [selectedStylist, setSelectedStylist] = useState<number | null>(staffId);
 
-  // Use mock data for now since API may not have staff availability
-  const staffList = mockStaff;
+  // Fetch staff for the branch
+  const {
+    data: staffData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["branch-staff", branchId],
+    queryFn: () => branchesApi.getStaffByBranch(branchId!),
+    enabled: !!branchId,
+  });
+
+  // Filter to only show users with role "staff"
+  const staffList = staffData?.filter((user) => user.role === "staff") ?? [];
 
   const handleSelectStylist = (id: number | null, name: string) => {
     setSelectedStylist(id);
@@ -71,22 +77,47 @@ export default function StylistScreen() {
               selected={selectedStylist === null}
             />
 
+            {/* Loading State */}
+            {isLoading && (
+              <View className="py-8 items-center">
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text className="text-text-secondary text-sm font-montserrat-regular mt-2">
+                  Đang tải danh sách thợ...
+                </Text>
+              </View>
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <View className="py-8 items-center">
+                <Text className="text-coral text-md font-montserrat-medium">
+                  Không thể tải danh sách thợ
+                </Text>
+                <Text className="text-text-secondary text-sm font-montserrat-regular mt-1">
+                  Vui lòng thử lại sau
+                </Text>
+              </View>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && !error && staffList.length === 0 && (
+              <View className="py-8 items-center">
+                <Text className="text-text-secondary text-md font-montserrat-medium">
+                  Chưa có thợ nào
+                </Text>
+              </View>
+            )}
+
             {/* Stylist List */}
-            {staffList.map((staff) => (
+            {!isLoading && staffList.map((staff) => (
               <StylistCard
                 key={staff.id}
                 id={staff.id.toString()}
-                name={staff.name}
-                specialty={staff.specialty}
-                rating={staff.rating}
-                reviewCount={staff.reviewCount}
-                isAvailable={staff.isAvailable}
+                name={staff.fullName}
+                specialty="Barber"
+                isAvailable={true}
                 avatar={null}
-                onPress={() => {
-                  if (staff.isAvailable) {
-                    handleSelectStylist(staff.id, staff.name);
-                  }
-                }}
+                onPress={() => handleSelectStylist(staff.id, staff.fullName)}
                 selected={selectedStylist === staff.id}
               />
             ))}

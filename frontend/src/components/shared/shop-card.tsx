@@ -66,9 +66,12 @@ function ShopCardComponent({
             {name}
           </Text>
 
-          <View className="flex-row items-center mt-1">
-            <Rating score={rating} count={reviewCount} size="sm" />
-          </View>
+          {/* Only show rating if data exists */}
+          {rating !== undefined && rating > 0 && reviewCount !== undefined && reviewCount > 0 && (
+            <View className="flex-row items-center mt-1">
+              <Rating score={rating} count={reviewCount} size="sm" />
+            </View>
+          )}
 
           <View className="flex-row items-center mt-1">
             <Ionicons name="location-outline" size={12} color={colors.textTertiary} />
@@ -146,9 +149,12 @@ function ShopCardComponent({
           {name}
         </Text>
 
-        <View className="flex-row items-center mt-2">
-          <Rating score={rating} count={reviewCount} size="sm" />
-        </View>
+        {/* Only show rating if data exists */}
+        {rating !== undefined && rating > 0 && reviewCount !== undefined && reviewCount > 0 && (
+          <View className="flex-row items-center mt-2">
+            <Rating score={rating} count={reviewCount} size="sm" />
+          </View>
+        )}
 
         <View className="flex-row items-center mt-2">
           <Ionicons name="location-outline" size={14} color={colors.textTertiary} />

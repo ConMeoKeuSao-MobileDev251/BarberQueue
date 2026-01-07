@@ -225,8 +225,6 @@ export default function HomeScreen() {
                   id={branch.id.toString()}
                   name={branch.name}
                   address={branch.address?.addressText || ""}
-                  rating={4.5}
-                  reviewCount={120}
                   image={null}
                   isOpen={true}
                   onPress={() => handleShopPress(branch)}

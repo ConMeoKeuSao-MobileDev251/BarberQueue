@@ -15,7 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { servicesApi } from "@/src/api/services";
 import { reviewsApi } from "@/src/api/reviews";
 import { favoritesApi } from "@/src/api/favorites";
-import { useCartStore, useAuthStore } from "@/src/stores";
+import { useCartStore, useCartTotalItems, useCartTotalPrice, useAuthStore } from "@/src/stores";
 import type { Service, Review, Branch } from "@/src/types";
 import { Rating } from "@/src/components/ui/rating";
 import { Badge } from "@/src/components/ui/badge";
@@ -43,7 +43,9 @@ export default function ShopDetailsScreen() {
   const isClient = isAuthenticated && user?.role === "client";
 
   // Cart store
-  const { items, addItem, removeItem, setBranch, totalItems, totalPrice } = useCartStore();
+  const { items, addItem, removeItem, setBranch } = useCartStore();
+  const totalItems = useCartTotalItems();
+  const totalPrice = useCartTotalPrice();
 
   // Fetch user favorites
   const { data: favoritesData } = useQuery({

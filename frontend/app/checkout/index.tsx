@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useCartStore } from "@/src/stores";
+import { useCartStore, useCartTotalItems, useCartTotalPrice, useCartTotalDuration } from "@/src/stores";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { Avatar } from "@/src/components/ui/avatar";
 import { Button } from "@/src/components/ui/button";
@@ -30,10 +30,10 @@ export default function CheckoutScreen() {
     dateTime,
     updateQuantity,
     removeItem,
-    totalItems,
-    totalPrice,
-    totalDuration,
   } = useCartStore();
+  const totalItems = useCartTotalItems();
+  const totalPrice = useCartTotalPrice();
+  const totalDuration = useCartTotalDuration();
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);

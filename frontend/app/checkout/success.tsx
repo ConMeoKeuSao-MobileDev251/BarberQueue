@@ -17,7 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { bookingsApi } from "@/src/api/bookings";
-import { useCartStore, useAuthStore } from "@/src/stores";
+import { useCartStore, useCartTotalPrice, useCartTotalDuration, useAuthStore } from "@/src/stores";
 import { Button } from "@/src/components/ui/button";
 import { showToast } from "@/src/components/ui/toast";
 import { colors } from "@/src/constants/theme";
@@ -34,10 +34,10 @@ export default function BookingSuccessScreen() {
     staffName,
     staffId,
     dateTime,
-    totalPrice,
-    totalDuration,
     clearCart,
   } = useCartStore();
+  const totalPrice = useCartTotalPrice();
+  const totalDuration = useCartTotalDuration();
 
   // Animation values
   const scale = useSharedValue(0);
