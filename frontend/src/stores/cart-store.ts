@@ -3,6 +3,7 @@
  * Manages shopping cart state for booking services
  */
 import { create } from "zustand";
+import * as Sentry from "@sentry/react-native";
 import type { Service, CartItem } from "../types";
 
 interface CartState {
@@ -40,6 +41,17 @@ export const useCartStore = create<CartState>()((set, get) => ({
 
   // Add service to cart
   addItem: (service) => {
+    // Track service added event
+    Sentry.captureMessage("service_added", {
+      level: "info",
+      tags: { action: "cart" },
+      extra: {
+        serviceId: service.id,
+        serviceName: service.name,
+        price: service.price,
+      },
+    });
+
     set((state) => {
       const existingItem = state.items.find(
         (item) => item.service.id === service.id

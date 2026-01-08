@@ -16,6 +16,7 @@ import Animated, {
   withDelay,
 } from "react-native-reanimated";
 
+import * as Sentry from "@sentry/react-native";
 import { bookingsApi } from "@/src/api/bookings";
 import { useCartStore, useCartTotalPrice, useCartTotalDuration, useCartFinalPrice, useCartDiscount, useAuthStore } from "@/src/stores";
 import { Button } from "@/src/components/ui/button";
@@ -134,6 +135,18 @@ export default function BookingSuccessScreen() {
     onSuccess: (data) => {
       console.log("=== BOOKING SUCCESS ===", data);
       showToast("Đặt lịch thành công!", "success");
+
+      // Track booking created event
+      Sentry.captureMessage("booking_created", {
+        level: "info",
+        tags: { action: "booking" },
+        extra: {
+          bookingId: data?.id,
+          branchId: data?.branchId,
+          staffId: data?.staffId,
+          totalPrice: data?.totalPrice,
+        },
+      });
     },
     onError: (error: Error) => {
       console.error("=== BOOKING ERROR ===", error);
