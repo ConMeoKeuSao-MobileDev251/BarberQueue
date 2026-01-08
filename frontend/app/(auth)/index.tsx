@@ -115,6 +115,9 @@ export default function AuthScreen() {
       };
       await setAuth(tempUser, data.accessToken);
 
+      // Track final role for redirect
+      let finalRole = data.role;
+
       // Fetch complete user profile
       try {
         const profileResponse = await authApi.getCurrentUser();
@@ -130,12 +133,19 @@ export default function AuthScreen() {
           email: profileResponse.email ?? tempUser.email,
         };
         await setAuth(fullUser, data.accessToken);
+        finalRole = fullUser.role;
       } catch (error) {
         console.error("[Auth] Failed to fetch user profile:", error);
       }
 
       showToast(t("auth.loginSuccess"), "success");
-      router.replace("/(tabs)");
+
+      // Redirect based on role
+      if (finalRole === "owner") {
+        router.replace("/(owner)" as never);
+      } else {
+        router.replace("/(tabs)");
+      }
     },
     onError: (error: Error) => {
       showToast(error.message || t("common.error"), "error");

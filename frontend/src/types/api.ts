@@ -28,6 +28,17 @@ export interface RegisterClientRequest {
   longitude?: number;
 }
 
+export interface RegisterStaffOwnerRequest {
+  phoneNumber: string;
+  password: string;
+  fullName: string;
+  birthDate?: string;
+  email?: string;
+  role: "staff" | "owner";
+  addressId: number;
+  branchId: number;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -85,7 +96,7 @@ export interface Branch {
 export interface CreateBranchRequest {
   name: string;
   phoneNumber: string;
-  address: CreateAddressRequest;
+  addressId: number; // API requires existing addressId
 }
 
 // ========== Service ==========

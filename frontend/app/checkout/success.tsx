@@ -17,7 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { bookingsApi } from "@/src/api/bookings";
-import { useCartStore, useCartTotalPrice, useCartTotalDuration, useAuthStore } from "@/src/stores";
+import { useCartStore, useCartTotalPrice, useCartTotalDuration, useCartFinalPrice, useCartDiscount, useAuthStore } from "@/src/stores";
 import { Button } from "@/src/components/ui/button";
 import { showToast } from "@/src/components/ui/toast";
 import { colors } from "@/src/constants/theme";
@@ -35,15 +35,21 @@ export default function BookingSuccessScreen() {
     staffName,
     staffId,
     dateTime,
+    promoCode,
     clearCart,
   } = useCartStore();
   const totalPrice = useCartTotalPrice();
   const totalDuration = useCartTotalDuration();
+  const finalPrice = useCartFinalPrice();
+  const discount = useCartDiscount();
 
   // Store display data before cart is cleared
   const [displayData, setDisplayData] = useState<{
     items: typeof items;
     totalPrice: number;
+    finalPrice: number;
+    discount: number;
+    promoCode: string | null;
     branchName: string;
     staffName: string;
     dateTime: string;
@@ -146,10 +152,11 @@ export default function BookingSuccessScreen() {
       console.log("Triggering booking creation with userId:", user.id);
 
       // Capture cart snapshot before clearing (includes staffId/branchId/dateTime!)
+      // Use finalPrice (after discount) for the booking
       const cartSnapshot = {
         items: [...items],
         totalDuration,
-        totalPrice,
+        totalPrice: finalPrice, // Send discounted price to API
         staffId,
         branchId,
         dateTime,
@@ -159,6 +166,9 @@ export default function BookingSuccessScreen() {
       setDisplayData({
         items: [...items],
         totalPrice,
+        finalPrice,
+        discount,
+        promoCode,
         branchName: branchName || "Barbershop",
         staffName: staffName || "Thợ bất kỳ",
         dateTime: dateTime || "",
@@ -274,14 +284,34 @@ export default function BookingSuccessScreen() {
               ))}
             </View>
 
-            {/* Total */}
-            <View className="flex-row justify-between pt-4">
-              <Text className="text-text-primary text-lg font-montserrat-bold">
-                Tổng cộng
-              </Text>
-              <Text className="text-primary text-lg font-montserrat-bold">
-                {formatPrice(displayData.totalPrice)}
-              </Text>
+            {/* Pricing */}
+            <View className="pt-4">
+              <View className="flex-row justify-between py-1">
+                <Text className="text-text-secondary text-sm font-montserrat-regular">
+                  Tạm tính
+                </Text>
+                <Text className="text-text-primary text-sm font-montserrat-medium">
+                  {formatPrice(displayData.totalPrice)}
+                </Text>
+              </View>
+              {displayData.discount > 0 && (
+                <View className="flex-row justify-between py-1">
+                  <Text className="text-text-secondary text-sm font-montserrat-regular">
+                    Giảm giá {displayData.promoCode && `(${displayData.promoCode})`}
+                  </Text>
+                  <Text className="text-success text-sm font-montserrat-medium">
+                    -{formatPrice(displayData.discount)}
+                  </Text>
+                </View>
+              )}
+              <View className="flex-row justify-between pt-2 mt-2 border-t border-border-light">
+                <Text className="text-text-primary text-lg font-montserrat-bold">
+                  Tổng cộng
+                </Text>
+                <Text className="text-primary text-lg font-montserrat-bold">
+                  {formatPrice(displayData.finalPrice)}
+                </Text>
+              </View>
             </View>
           </Animated.View>
         )}

@@ -6,6 +6,7 @@ import type {
   LoginRequest,
   LoginResponse,
   RegisterClientRequest,
+  RegisterStaffOwnerRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
   User,
@@ -26,6 +27,17 @@ export const authApi = {
   registerClient: async (data: RegisterClientRequest): Promise<User> => {
     const response = await apiClient.post<User>(
       "/auth/register/client",
+      data
+    );
+    return response.data;
+  },
+
+  /**
+   * Register a new staff or owner user
+   */
+  registerStaffOrOwner: async (data: RegisterStaffOwnerRequest): Promise<LoginResponse> => {
+    const response = await apiClient.post<LoginResponse>(
+      "/auth/register/staff-or-owner",
       data
     );
     return response.data;

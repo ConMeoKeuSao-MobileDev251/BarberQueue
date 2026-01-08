@@ -40,6 +40,10 @@ export const colors = {
   // Special
   favorite: "#FF6B6B",
   rating: "#FFD700",
+
+  // Additional
+  white: "#FFFFFF",
+  danger: "#F44336",
 } as const;
 
 export const fonts = {

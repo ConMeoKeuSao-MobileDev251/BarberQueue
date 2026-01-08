@@ -49,6 +49,7 @@ export default function RootLayout() {
   const restoreAuth = useAuthStore((state) => state.restoreAuth);
   const isAuthLoading = useAuthStore((state) => state.isLoading);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   // Load fonts
   const [fontsLoaded] = useFonts({
@@ -72,17 +73,36 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, isInitialized, isAuthLoading]);
 
-  // Auth guard - redirect based on auth state
+  // Auth guard - redirect based on auth state and role
   useEffect(() => {
-    if (!fontsLoaded || !isInitialized || isAuthLoading) return;
+    console.log("[Auth Guard] State:", {
+      fontsLoaded,
+      isInitialized,
+      isAuthLoading,
+      isAuthenticated,
+      onboardingComplete,
+      userRole: user?.role,
+      userId: user?.id,
+    });
+
+    if (!fontsLoaded || !isInitialized || isAuthLoading) {
+      console.log("[Auth Guard] Still loading, skipping redirect");
+      return;
+    }
 
     if (!onboardingComplete) {
+      console.log("[Auth Guard] Redirecting to onboarding");
       router.replace("/(onboarding)");
     } else if (!isAuthenticated) {
+      console.log("[Auth Guard] Not authenticated, redirecting to login");
       router.replace("/(auth)/login");
+    } else if (user?.role === "owner") {
+      console.log("[Auth Guard] Owner detected, redirecting to /(owner)");
+      router.replace("/(owner)" as never);
+    } else {
+      console.log("[Auth Guard] Client/Staff, staying on (tabs)");
     }
-    // If authenticated, stay on current route (tabs)
-  }, [fontsLoaded, isInitialized, isAuthLoading, isAuthenticated, onboardingComplete, router]);
+  }, [fontsLoaded, isInitialized, isAuthLoading, isAuthenticated, onboardingComplete, user?.role, router]);
 
   // Show nothing while loading
   if (!fontsLoaded || !isInitialized || isAuthLoading) {
@@ -95,12 +115,14 @@ export default function RootLayout() {
         <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(owner)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
             <Stack.Screen name="shop" options={{ headerShown: false }} />
             <Stack.Screen name="checkout" options={{ headerShown: false }} />
             <Stack.Screen name="booking" options={{ headerShown: false }} />
             <Stack.Screen name="account" options={{ headerShown: false }} />
+            <Stack.Screen name="owner" options={{ headerShown: false }} />
             <Stack.Screen
               name="modal"
               options={{ presentation: "modal", title: "Modal" }}

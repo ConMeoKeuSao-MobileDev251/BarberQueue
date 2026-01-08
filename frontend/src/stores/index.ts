@@ -16,6 +16,8 @@ export {
   useCartTotalPrice,
   useCartTotalItems,
   useCartTotalDuration,
+  useCartDiscount,
+  useCartFinalPrice,
 } from "./cart-store";
 
 export {
