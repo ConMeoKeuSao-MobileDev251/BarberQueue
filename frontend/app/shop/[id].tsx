@@ -17,8 +17,6 @@ import { reviewsApi } from "@/src/api/reviews";
 import { favoritesApi } from "@/src/api/favorites";
 import { useCartStore, useCartTotalItems, useCartTotalPrice, useAuthStore } from "@/src/stores";
 import type { Service, Review, Branch } from "@/src/types";
-import { Rating } from "@/src/components/ui/rating";
-import { Badge } from "@/src/components/ui/badge";
 import { ServiceCard } from "@/src/components/shared/service-card";
 import { SkeletonServiceCard } from "@/src/components/ui/skeleton";
 import { colors } from "@/src/constants/theme";
@@ -181,17 +179,17 @@ export default function ShopDetailsScreen() {
     <View className="flex-1 bg-background-secondary">
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Hero Image */}
-        <View className="relative h-64">
+        <View className="relative h-80">
           <Image
             source={shopHeroImage}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
           />
 
-          {/* Gradient Overlay */}
+          {/* Gradient Overlay - darker at bottom for text legibility */}
           <LinearGradient
-            colors={["rgba(0,0,0,0.4)", "transparent", "rgba(0,0,0,0.6)"]}
-            locations={[0, 0.5, 1]}
+            colors={["rgba(0,0,0,0.3)", "transparent", "rgba(0,0,0,0.75)"]}
+            locations={[0, 0.4, 1]}
             style={{ position: "absolute", inset: 0 }}
           />
 
@@ -213,84 +211,99 @@ export default function ShopDetailsScreen() {
               <Ionicons name="share-outline" size={24} color="white" />
             </Pressable>
           </View>
+
+          {/* Bottom Overlay Content - Shop info on image */}
+          <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">
+            <View className="flex-row justify-between items-start">
+              {/* Left: Shop Info */}
+              <View className="flex-1 pr-4">
+                <Text className="text-white/80 text-xs font-montserrat-semibold tracking-wider uppercase">
+                  CẮT TÓC NAM
+                </Text>
+                <Text
+                  className="text-white text-2xl font-montserrat-bold mt-1"
+                  numberOfLines={2}
+                >
+                  {branch?.name || "Loading..."}
+                </Text>
+                <View className="flex-row items-center mt-2">
+                  <Ionicons name="location" size={14} color="rgba(255,255,255,0.9)" />
+                  <Text
+                    className="text-white/90 text-sm font-montserrat-regular ml-1 flex-1"
+                    numberOfLines={2}
+                  >
+                    {branch?.address?.addressText || "..."}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Right: Favorite Button */}
+              {isClient && (
+                <Pressable
+                  onPress={handleToggleFavorite}
+                  disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
+                  className="items-center"
+                >
+                  <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center">
+                    <Ionicons
+                      name={isFavorite ? "heart" : "heart-outline"}
+                      size={22}
+                      color="white"
+                    />
+                  </View>
+                  <Text className="text-white text-xs font-montserrat-regular mt-1">
+                    Yêu thích
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
         </View>
 
-        {/* Shop Info Card */}
-        <View className="bg-white mx-4 -mt-8 rounded-xl p-4 shadow-md relative z-10">
-          <View className="flex-row items-start justify-between">
-            <View className="flex-1">
-              <Badge variant="primary">BARBERSHOP</Badge>
-              <Text className="text-text-primary text-xl font-montserrat-bold mt-2">
-                {branch?.name || "Loading..."}
+        {/* Action Bar - Flat icons + Rating pill */}
+        <View className="bg-white px-4 py-3 flex-row items-center justify-between">
+          {/* Action Buttons - Flat icons, grouped left */}
+          <View className="flex-row items-center">
+            <Pressable onPress={handleCall} className="items-center mr-6">
+              <Ionicons name="call-outline" size={22} color={colors.primary} />
+              <Text className="text-primary text-xs font-montserrat-medium mt-1">
+                Liên hệ
               </Text>
-              <View className="flex-row items-center mt-2">
-                <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
-                <Text className="text-text-secondary text-sm font-montserrat-regular ml-1">
-                  {branch?.address?.addressText || "..."}
-                </Text>
-              </View>
-            </View>
+            </Pressable>
 
-            {/* Favorite Button - only show for clients */}
-            {isClient && (
-              <Pressable
-                onPress={handleToggleFavorite}
-                disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
-              >
-                <Ionicons
-                  name={isFavorite ? "heart" : "heart-outline"}
-                  size={24}
-                  color={isFavorite ? colors.coral : colors.textSecondary}
-                />
-              </Pressable>
-            )}
+            <Pressable onPress={handleDirections} className="items-center mr-6">
+              <Ionicons name="location-outline" size={22} color={colors.primary} />
+              <Text className="text-primary text-xs font-montserrat-medium mt-1">
+                Chỉ đường
+              </Text>
+            </Pressable>
+
+            <Pressable onPress={handleShare} className="items-center">
+              <Ionicons name="share-outline" size={22} color={colors.primary} />
+              <Text className="text-primary text-xs font-montserrat-medium mt-1">
+                Chia sẻ
+              </Text>
+            </Pressable>
           </View>
 
-          {/* Action Row */}
-          <View className="flex-row items-center justify-between mt-4 pt-4 border-t border-border-light">
-            <Pressable
-              onPress={handleCall}
-              className="flex-row items-center"
-            >
-              <View className="w-10 h-10 rounded-full bg-primary-light items-center justify-center">
-                <Ionicons name="call" size={18} color={colors.primary} />
-              </View>
-              <Text className="text-text-primary text-sm font-montserrat-medium ml-2">
-                {t("shop.call")}
+          {/* Rating Pill */}
+          <View className="flex-row items-center">
+            {reviewCount > 0 ? (
+              <>
+                <View className="flex-row items-center border border-gray-300 rounded-lg px-2 py-1">
+                  <Ionicons name="star" size={16} color={colors.rating} />
+                  <Text className="text-text-primary text-sm font-montserrat-bold ml-1">
+                    {averageRating.toFixed(1)}
+                  </Text>
+                </View>
+                <Text className="text-text-secondary text-sm font-montserrat-regular ml-2">
+                  {reviewCount} đánh giá
+                </Text>
+              </>
+            ) : (
+              <Text className="text-text-tertiary text-sm font-montserrat-regular">
+                Chưa có đánh giá
               </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={handleDirections}
-              className="flex-row items-center"
-            >
-              <View className="w-10 h-10 rounded-full bg-primary-light items-center justify-center">
-                <Ionicons name="navigate" size={18} color={colors.primary} />
-              </View>
-              <Text className="text-text-primary text-sm font-montserrat-medium ml-2">
-                {t("shop.directions")}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={handleShare}
-              className="flex-row items-center"
-            >
-              <View className="w-10 h-10 rounded-full bg-primary-light items-center justify-center">
-                <Ionicons name="share-social" size={18} color={colors.primary} />
-              </View>
-              <Text className="text-text-primary text-sm font-montserrat-medium ml-2">
-                {t("shop.share")}
-              </Text>
-            </Pressable>
-
-            {/* Only show rating if there are reviews */}
-            {reviewCount > 0 && (
-              <Rating
-                score={averageRating}
-                count={reviewCount}
-                size="md"
-              />
             )}
           </View>
         </View>
