@@ -77,7 +77,7 @@ export function AuthTabToggle({ activeTab, onTabChange }: AuthTabToggleProps) {
       {/* Login Tab */}
       <AnimatedPressable
         onPress={() => onTabChange("login")}
-        className="flex-1 py-3 rounded-full items-center justify-center"
+        className="flex-1 py-3 px-2 rounded-full items-center justify-center"
         style={loginTabStyle}
         accessibilityRole="tab"
         accessibilityLabel={t("auth.login")}
@@ -87,6 +87,9 @@ export function AuthTabToggle({ activeTab, onTabChange }: AuthTabToggleProps) {
         <Animated.Text
           className="font-montserrat-medium text-sm"
           style={[{ fontFamily: "Montserrat-Medium" }, loginTextStyle]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
         >
           {t("auth.login")}
         </Animated.Text>
@@ -95,7 +98,7 @@ export function AuthTabToggle({ activeTab, onTabChange }: AuthTabToggleProps) {
       {/* Register Tab */}
       <AnimatedPressable
         onPress={() => onTabChange("register")}
-        className="flex-1 py-3 rounded-full items-center justify-center"
+        className="flex-1 py-3 px-2 rounded-full items-center justify-center"
         style={registerTabStyle}
         accessibilityRole="tab"
         accessibilityLabel={t("auth.register")}
@@ -105,6 +108,9 @@ export function AuthTabToggle({ activeTab, onTabChange }: AuthTabToggleProps) {
         <Animated.Text
           className="font-montserrat-medium text-sm"
           style={[{ fontFamily: "Montserrat-Medium" }, registerTextStyle]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
         >
           {t("auth.register")}
         </Animated.Text>

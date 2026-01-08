@@ -1,5 +1,6 @@
 /**
  * Jest Setup File
+ * Global mocks and test utilities
  */
 
 // Mock expo-haptics
@@ -33,6 +34,25 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
   removeItem: jest.fn(),
 }));
 
+// Mock expo-location
+jest.mock("expo-location", () => ({
+  requestForegroundPermissionsAsync: jest.fn(),
+  getCurrentPositionAsync: jest.fn(),
+  reverseGeocodeAsync: jest.fn(),
+  Accuracy: {
+    Balanced: 3,
+    High: 4,
+    Highest: 5,
+    Low: 2,
+    Lowest: 1,
+  },
+  PermissionStatus: {
+    GRANTED: "granted",
+    DENIED: "denied",
+    UNDETERMINED: "undetermined",
+  },
+}));
+
 // Mock react-native Platform
 jest.mock("react-native", () => ({
   Platform: {
@@ -40,3 +60,23 @@ jest.mock("react-native", () => ({
     select: jest.fn((obj) => obj.ios),
   },
 }));
+
+// Mock @sentry/react-native to prevent initialization errors
+jest.mock("@sentry/react-native", () => ({
+  init: jest.fn(),
+  captureMessage: jest.fn(),
+  captureException: jest.fn(),
+  setUser: jest.fn(),
+  addBreadcrumb: jest.fn(),
+}));
+
+// Suppress console logs in tests (comment out for debugging)
+const originalConsole = global.console;
+global.console = {
+  ...originalConsole,
+  log: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  error: jest.fn(), // Suppress error logs in tests
+  warn: jest.fn(),
+};

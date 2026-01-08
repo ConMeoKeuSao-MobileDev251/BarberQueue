@@ -54,7 +54,8 @@
         {
           "url": "https://sentry.io/",
           "project": "barberqueue",
-          "organization": "phatloc"
+          "organization": "phatloc",
+          "enableAutoUpload": false
         }
       ]
     ],
