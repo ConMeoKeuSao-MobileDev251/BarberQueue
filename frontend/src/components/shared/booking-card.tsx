@@ -21,10 +21,12 @@ interface BookingCardProps {
   id: string;
   shopName: string;
   shopImage?: string | null;
+  staffName?: string; // Stylist name
   status: BookingStatus;
   date: string; // ISO date string
   time: string; // HH:mm format
   services: BookingService[];
+  totalDuration?: number; // Duration in minutes (fallback when no services)
   totalPrice: number;
   onPress?: () => void;
   onCancel?: () => void;
@@ -34,10 +36,12 @@ interface BookingCardProps {
 function BookingCardComponent({
   shopName,
   shopImage,
+  staffName,
   status,
   date,
   time,
   services,
+  totalDuration,
   totalPrice,
   onPress,
   onCancel,
@@ -83,22 +87,45 @@ function BookingCardComponent({
         <StatusBadge status={status} />
       </View>
 
-      {/* Services */}
-      <View className="p-4 border-b border-border-light">
-        {services.slice(0, 3).map((service, index) => (
-          <View key={service.id} className={`flex-row justify-between ${index > 0 ? "mt-2" : ""}`}>
-            <Text className="text-sm font-montserrat-regular text-text-secondary flex-1" numberOfLines={1}>
-              {service.name}
-            </Text>
-            <Text className="text-sm font-montserrat-medium text-text-primary ml-2">
-              {formatPrice(service.price)}
+      {/* Staff Info */}
+      {staffName && (
+        <View className="px-4 py-2 border-b border-border-light">
+          <View className="flex-row items-center">
+            <Ionicons name="person-outline" size={14} color={colors.textSecondary} />
+            <Text className="text-sm font-montserrat-regular text-text-secondary ml-2">
+              Stylist: {staffName}
             </Text>
           </View>
-        ))}
-        {services.length > 3 && (
-          <Text className="text-xs font-montserrat-regular text-text-tertiary mt-2">
-            +{services.length - 3} dịch vụ khác
-          </Text>
+        </View>
+      )}
+
+      {/* Services or Duration */}
+      <View className="p-4 border-b border-border-light">
+        {services.length > 0 ? (
+          <>
+            {services.slice(0, 3).map((service, index) => (
+              <View key={service.id} className={`flex-row justify-between ${index > 0 ? "mt-2" : ""}`}>
+                <Text className="text-sm font-montserrat-regular text-text-secondary flex-1" numberOfLines={1}>
+                  {service.name}
+                </Text>
+                <Text className="text-sm font-montserrat-medium text-text-primary ml-2">
+                  {formatPrice(service.price)}
+                </Text>
+              </View>
+            ))}
+            {services.length > 3 && (
+              <Text className="text-xs font-montserrat-regular text-text-tertiary mt-2">
+                +{services.length - 3} dịch vụ khác
+              </Text>
+            )}
+          </>
+        ) : (
+          <View className="flex-row items-center">
+            <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+            <Text className="text-sm font-montserrat-regular text-text-secondary ml-2">
+              Thời gian: {totalDuration || 0} phút
+            </Text>
+          </View>
         )}
       </View>
 

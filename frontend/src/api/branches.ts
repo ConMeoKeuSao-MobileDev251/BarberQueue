@@ -4,7 +4,21 @@
 import { apiClient } from "./client";
 import type { Branch, User } from "../types";
 
+// Default HCM center coordinates for fetching all branches
+const DEFAULT_HCM_COORDS = { latitude: 10.7769, longitude: 106.7009 };
+
 export const branchesApi = {
+  /**
+   * Get all branches (workaround - no getById endpoint)
+   * Uses default HCM coords to fetch branch list for lookup
+   */
+  getAll: async (): Promise<Branch[]> => {
+    const response = await apiClient.get<Branch[]>("/branch", {
+      params: DEFAULT_HCM_COORDS,
+    });
+    return response.data;
+  },
+
   /**
    * Search branches by location
    */

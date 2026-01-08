@@ -115,6 +115,7 @@ export interface Booking {
   totalPrice: number;
   clientId: number;
   staffId: number;
+  branchId: number;
   createdAt: string;
   updatedAt: string;
   services?: Service[];
