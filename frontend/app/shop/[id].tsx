@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { servicesApi } from "@/src/api/services";
 import { reviewsApi } from "@/src/api/reviews";
 import { favoritesApi } from "@/src/api/favorites";
+import { branchesApi } from "@/src/api/branches";
 import { useCartStore, useCartTotalItems, useCartTotalPrice, useAuthStore } from "@/src/stores";
 import type { Service, Review, Branch } from "@/src/types";
 import { ServiceCard } from "@/src/components/shared/service-card";
@@ -33,8 +34,22 @@ export default function ShopDetailsScreen() {
   const queryClient = useQueryClient();
   const branchId = parseInt(id || "0");
 
-  // Parse branch data from navigation params
-  const branch: Branch | null = branchData ? JSON.parse(branchData) : null;
+  // Parse branch data from navigation params (if passed)
+  const passedBranch: Branch | null = branchData ? JSON.parse(branchData) : null;
+
+  // Fetch branch data if not passed via params (e.g., from booking history)
+  const { data: fetchedBranch } = useQuery({
+    queryKey: ["branch", branchId],
+    queryFn: async () => {
+      const branches = await branchesApi.getAll();
+      return branches.find((b) => b.id === branchId) || null;
+    },
+    enabled: !passedBranch && branchId > 0,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+  });
+
+  // Use passed branch data or fetched branch data
+  const branch = passedBranch || fetchedBranch || null;
 
   // Auth store - check if user is client
   const { user, isAuthenticated } = useAuthStore();

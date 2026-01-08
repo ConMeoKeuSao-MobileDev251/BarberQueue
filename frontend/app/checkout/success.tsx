@@ -68,11 +68,39 @@ export default function BookingSuccessScreen() {
 
   // Create booking mutation
   const createBookingMutation = useMutation({
-    mutationFn: async (cartSnapshot: { items: typeof items; totalDuration: number; totalPrice: number }) => {
+    mutationFn: async (cartSnapshot: {
+      items: typeof items;
+      totalDuration: number;
+      totalPrice: number;
+      staffId: number | null;
+      branchId: number | null;
+      dateTime: string | null;
+    }) => {
       // Parse datetime to get start/end times
-      const now = new Date();
-      const startAt = now.toISOString();
-      const endAt = new Date(now.getTime() + cartSnapshot.totalDuration * 60000).toISOString();
+      // dateTime format: "T6, 9/1 - 17:30" or similar
+      let startAt: string;
+      if (cartSnapshot.dateTime) {
+        // Parse the selected date/time
+        const parts = cartSnapshot.dateTime.split(" - ");
+        const timePart = parts[1] || "10:00"; // Default time if not found
+        const datePart = parts[0] || "";
+
+        // Extract day/month from "T6, 9/1" format
+        const dateMatch = datePart.match(/(\d+)\/(\d+)/);
+        const [hours, minutes] = timePart.split(":").map(Number);
+
+        const selectedDate = new Date();
+        if (dateMatch) {
+          selectedDate.setMonth(parseInt(dateMatch[2]) - 1); // Month is 0-indexed
+          selectedDate.setDate(parseInt(dateMatch[1]));
+        }
+        selectedDate.setHours(hours, minutes, 0, 0);
+
+        startAt = selectedDate.toISOString();
+      } else {
+        startAt = new Date().toISOString();
+      }
+      const endAt = new Date(new Date(startAt).getTime() + cartSnapshot.totalDuration * 60000).toISOString();
 
       const requestPayload = {
         startAt,
@@ -80,11 +108,13 @@ export default function BookingSuccessScreen() {
         totalDuration: cartSnapshot.totalDuration,
         totalPrice: cartSnapshot.totalPrice,
         clientId: user?.id || 0,
-        staffId: staffId || 1,
-        branchId: branchId || 1,
+        staffId: cartSnapshot.staffId || 1,
+        branchId: cartSnapshot.branchId || 1,
       };
 
       console.log("=== BOOKING CREATE DEBUG ===");
+      console.log("Selected dateTime:", cartSnapshot.dateTime);
+      console.log("Parsed startAt:", startAt);
       console.log("Request payload:", JSON.stringify(requestPayload, null, 2));
 
       const booking = await bookingsApi.create(requestPayload);
@@ -115,11 +145,14 @@ export default function BookingSuccessScreen() {
     if (items.length > 0 && hasValidUser) {
       console.log("Triggering booking creation with userId:", user.id);
 
-      // Capture cart snapshot before clearing
+      // Capture cart snapshot before clearing (includes staffId/branchId/dateTime!)
       const cartSnapshot = {
         items: [...items],
         totalDuration,
         totalPrice,
+        staffId,
+        branchId,
+        dateTime,
       };
 
       // Store display data for UI

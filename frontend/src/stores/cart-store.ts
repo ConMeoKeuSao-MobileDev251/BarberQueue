@@ -77,9 +77,15 @@ export const useCartStore = create<CartState>()((set, get) => ({
     }));
   },
 
-  // Set branch info
+  // Set branch info (clears staff if branch changes)
   setBranch: (branchId, branchName) => {
-    set({ branchId, branchName });
+    const currentBranchId = get().branchId;
+    // Clear staff selection if switching to a different branch
+    if (currentBranchId !== null && currentBranchId !== branchId) {
+      set({ branchId, branchName, staffId: null, staffName: null });
+    } else {
+      set({ branchId, branchName });
+    }
   },
 
   // Set staff info

@@ -9,9 +9,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { bookingsApi } from "@/src/api/bookings";
+import { favoritesApi } from "@/src/api/favorites";
 import { useAuthStore } from "@/src/stores";
+import { useEnrichedBookings, type EnrichedBooking } from "@/src/hooks";
 import { showToast } from "@/src/components/ui/toast";
-import type { Booking } from "@/src/types";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { CategoryTabs } from "@/src/components/shared/filter-chips";
 import { BookingCard } from "@/src/components/shared/booking-card";
@@ -43,12 +44,28 @@ export default function BookingsScreen() {
   // Fetch bookings - API returns array directly
   const {
     data: bookings,
-    isLoading,
+    isLoading: bookingsLoading,
     refetch,
   } = useQuery({
     queryKey: ["bookings"],
     queryFn: () => bookingsApi.getHistory({ page: 1, limit: 50 }),
   });
+
+  // Enrich bookings with branch and staff data
+  const { enrichedBookings, isLoading: enrichingLoading } =
+    useEnrichedBookings(bookings);
+
+  // Fetch user favorites to filter bookings from favorite branches
+  const { data: favorites } = useQuery({
+    queryKey: ["favorites"],
+    queryFn: favoritesApi.getAll,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Extract favorite branch IDs for filtering
+  const favoriteBranchIds = new Set(favorites?.map((f) => f.branchId) || []);
+
+  const isLoading = bookingsLoading || enrichingLoading;
 
   // Cancel booking mutation
   const cancelMutation = useMutation({
@@ -71,8 +88,8 @@ export default function BookingsScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  const handleBookingPress = (bookingId: number) => {
-    router.push(`/booking/${bookingId}` as never);
+  const handleBranchPress = (branchId: number) => {
+    router.push(`/shop/${branchId}` as never);
   };
 
   const handleCancelPress = (bookingId: number) => {
@@ -91,9 +108,9 @@ export default function BookingsScreen() {
     router.push("/(tabs)");
   };
 
-  // Filter bookings based on active tab (API returns array directly)
-  const filteredBookings: Booking[] =
-    bookings?.filter((booking: Booking) => {
+  // Filter enriched bookings based on active tab
+  const filteredBookings: EnrichedBooking[] =
+    enrichedBookings?.filter((booking: EnrichedBooking) => {
       const now = new Date();
       const bookingDate = new Date(booking.startAt);
 
@@ -111,7 +128,8 @@ export default function BookingsScreen() {
             booking.status !== "completed"
           );
         case "favorites":
-          return false; // Placeholder - no favorites API
+          // Show bookings from user's favorite branches
+          return favoriteBranchIds.has(booking.branchId);
         default:
           return true;
       }
@@ -159,8 +177,9 @@ export default function BookingsScreen() {
               <BookingCard
                 key={booking.id}
                 id={booking.id.toString()}
-                shopName={booking.staff?.fullName || "Barbershop"}
+                shopName={booking.branch?.name || "Đang tải..."}
                 shopImage={null}
+                staffName={booking.staffUser?.fullName || `Nhân viên #${booking.staffId}`}
                 status={
                   booking.status === "confirm" ? "confirmed" : booking.status
                 }
@@ -176,8 +195,9 @@ export default function BookingsScreen() {
                     price: s.price,
                   })) || []
                 }
+                totalDuration={booking.totalDuration}
                 totalPrice={booking.totalPrice}
-                onPress={() => handleBookingPress(booking.id)}
+                onPress={() => handleBranchPress(booking.branchId)}
                 onCancel={
                   booking.status === "pending" || booking.status === "confirmed"
                     ? () => handleCancelPress(booking.id)

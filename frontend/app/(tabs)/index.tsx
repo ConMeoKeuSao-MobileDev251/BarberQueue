@@ -20,7 +20,6 @@ import { Avatar } from "@/src/components/ui/avatar";
 import { BarberQueueLogo } from "@/src/components/ui/barberqueue-logo";
 import { SearchInput } from "@/src/components/ui/search-input";
 import { ShopCard } from "@/src/components/shared/shop-card";
-import { FilterChips } from "@/src/components/shared/filter-chips";
 import { SkeletonShopCard } from "@/src/components/ui/skeleton";
 import { EmptySearchResults } from "@/src/components/ui/empty-state";
 import { colors } from "@/src/constants/theme";
@@ -28,20 +27,12 @@ import { colors } from "@/src/constants/theme";
 // Local assets
 const couponImage = require("../../assets/images/coupon-image.png");
 
-// Filter options
-const filterOptions = [
-  { id: "price", label: "Giá", icon: "cash-outline" as const },
-  { id: "promo", label: "Khuyến mãi", icon: "pricetag-outline" as const },
-  { id: "rating", label: "Đánh giá", icon: "star-outline" as const },
-];
-
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
 
-  const [selectedFilter, setSelectedFilter] = useState<string | undefined>();
   const [refreshing, setRefreshing] = useState(false);
 
   // Get user's current location
@@ -163,17 +154,6 @@ export default function HomeScreen() {
               />
             </View>
           </Pressable>
-        </View>
-
-        {/* Filter Chips */}
-        <View className="mt-4">
-          <FilterChips
-            options={filterOptions}
-            selected={selectedFilter}
-            onChange={(id) =>
-              setSelectedFilter(id === selectedFilter ? undefined : id)
-            }
-          />
         </View>
 
         {/* Promotions Section */}

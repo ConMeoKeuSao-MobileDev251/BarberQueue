@@ -1,46 +1,52 @@
 /**
  * Search Screen
- * Search for shops and services with local storage for recent searches
+ * Search for barbershops by name with local storage for recent searches
  */
 import { View, Text, ScrollView, Pressable } from "react-native";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery } from "@tanstack/react-query";
 
 import { SearchInput } from "@/src/components/ui/search-input";
-import { EmptySearchResults } from "@/src/components/ui/empty-state";
+import { ShopCard } from "@/src/components/shared/shop-card";
 import { colors } from "@/src/constants/theme";
 import { useLocation } from "@/src/hooks";
+import { branchesApi } from "@/src/api/branches";
 
 const RECENT_SEARCHES_KEY = "@barberqueue:recent_searches";
 const MAX_RECENT_SEARCHES = 10;
-
-// Hot services placeholder data
-const hotServices = [
-  { id: "1", name: "Cắt tóc", icon: "cut" as const },
-  { id: "2", name: "Uốn tóc", icon: "color-wand" as const },
-  { id: "3", name: "Nhuộm", icon: "color-palette" as const },
-  { id: "4", name: "Gội đầu", icon: "water" as const },
-  { id: "5", name: "Tạo kiểu", icon: "sparkles" as const },
-  { id: "6", name: "Cạo râu", icon: "man" as const },
-];
 
 export default function SearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const {
+    coords,
     locationName,
     isLoading: locationLoading,
     refresh: refreshLocation,
   } = useLocation();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [hasSearched, setHasSearched] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  // Fetch branches by user's location
+  const { data: branches = [], isLoading: branchesLoading } = useQuery({
+    queryKey: ["branches", "search", coords.latitude, coords.longitude],
+    queryFn: () => branchesApi.searchByLocation(coords.latitude, coords.longitude),
+    enabled: !locationLoading,
+  });
+
+  // Filter branches by search query (client-side, case-insensitive)
+  const filteredBranches = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return branches;
+    return branches.filter((b) => b.name.toLowerCase().includes(query));
+  }, [branches, searchQuery]);
 
   // Load recent searches from AsyncStorage
   useEffect(() => {
@@ -64,7 +70,6 @@ export default function SearchScreen() {
         const trimmedQuery = query.trim();
         if (!trimmedQuery) return;
 
-        // Remove duplicate and add to front
         const updatedSearches = [
           trimmedQuery,
           ...recentSearches.filter((s) => s !== trimmedQuery),
@@ -81,14 +86,6 @@ export default function SearchScreen() {
     },
     [recentSearches]
   );
-
-  const handleSearch = useCallback(() => {
-    if (searchQuery.trim()) {
-      saveRecentSearch(searchQuery);
-      setHasSearched(true);
-      // TODO: Implement search API call when backend supports it
-    }
-  }, [searchQuery, saveRecentSearch]);
 
   const handleClearRecent = useCallback(async () => {
     try {
@@ -115,13 +112,22 @@ export default function SearchScreen() {
     [recentSearches]
   );
 
-  const handleRecentSearch = useCallback(
-    (query: string) => {
-      setSearchQuery(query);
-      saveRecentSearch(query);
-      setHasSearched(true);
+  const handleRecentSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  const handleBranchPress = useCallback(
+    (branch: (typeof branches)[0]) => {
+      // Save search query if user searched before tapping
+      if (searchQuery.trim()) {
+        saveRecentSearch(searchQuery);
+      }
+      router.push({
+        pathname: "/shop/[id]",
+        params: { id: branch.id, branchData: JSON.stringify(branch) },
+      });
     },
-    [saveRecentSearch]
+    [router, searchQuery, saveRecentSearch]
   );
 
   return (
@@ -154,99 +160,92 @@ export default function SearchScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder={t("home.searchPlaceholder")}
-          onSubmit={handleSearch}
-          onClear={() => {
-            setSearchQuery("");
-            setHasSearched(false);
-          }}
+          onClear={() => setSearchQuery("")}
         />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-        {!hasSearched ? (
-          <>
-            {/* Recent Searches */}
-            {recentSearches.length > 0 && (
-              <View className="px-4 mt-4">
-                <View className="flex-row items-center justify-between mb-3">
-                  <Text className="text-text-primary text-md font-montserrat-semibold">
-                    Gần đây
-                  </Text>
-                  <Pressable onPress={handleClearRecent}>
-                    <Text className="text-primary text-sm font-montserrat-medium">
-                      Xóa tất cả
-                    </Text>
-                  </Pressable>
-                </View>
-
-                <View className="gap-2">
-                  {recentSearches.map((search, index) => (
-                    <View key={index} className="flex-row items-center py-3">
-                      <Pressable
-                        onPress={() => handleRecentSearch(search)}
-                        className="flex-row items-center flex-1"
-                      >
-                        <Ionicons
-                          name="time-outline"
-                          size={20}
-                          color={colors.textTertiary}
-                        />
-                        <Text className="text-text-primary text-md font-montserrat-regular ml-3">
-                          {search}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => handleRemoveRecentSearch(search)}
-                        className="p-2"
-                      >
-                        <Ionicons
-                          name="close"
-                          size={18}
-                          color={colors.textTertiary}
-                        />
-                      </Pressable>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* Hot Services */}
-            <View className="px-4 mt-6">
-              <Text className="text-text-primary text-md font-montserrat-semibold mb-3">
-                Dịch vụ hot
+        {/* Recent Searches - only show when no search query */}
+        {!searchQuery.trim() && recentSearches.length > 0 && (
+          <View className="px-4 mt-4">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-text-primary text-md font-montserrat-semibold">
+                Gần đây
               </Text>
+              <Pressable onPress={handleClearRecent}>
+                <Text className="text-primary text-sm font-montserrat-medium">
+                  Xóa tất cả
+                </Text>
+              </Pressable>
+            </View>
 
-              <View className="flex-row flex-wrap gap-3">
-                {hotServices.map((service) => (
-                  <Pressable key={service.id} className="items-center w-20">
-                    <View className="w-16 h-16 rounded-full bg-primary-light items-center justify-center mb-2">
-                      <Ionicons
-                        name={service.icon}
-                        size={28}
-                        color={colors.primary}
-                      />
-                    </View>
-                    <Text className="text-text-primary text-xs font-montserrat-medium text-center">
-                      {service.name}
+            <View className="gap-2">
+              {recentSearches.map((search, index) => (
+                <View key={index} className="flex-row items-center py-3">
+                  <Pressable
+                    onPress={() => handleRecentSearch(search)}
+                    className="flex-row items-center flex-1"
+                  >
+                    <Ionicons
+                      name="time-outline"
+                      size={20}
+                      color={colors.textTertiary}
+                    />
+                    <Text className="text-text-primary text-md font-montserrat-regular ml-3">
+                      {search}
                     </Text>
                   </Pressable>
-                ))}
-              </View>
+                  <Pressable
+                    onPress={() => handleRemoveRecentSearch(search)}
+                    className="p-2"
+                  >
+                    <Ionicons
+                      name="close"
+                      size={18}
+                      color={colors.textTertiary}
+                    />
+                  </Pressable>
+                </View>
+              ))}
             </View>
-          </>
-        ) : (
-          // Search Results
-          <View className="flex-1 px-4 mt-4">
-            {/* No results placeholder - replace with actual search results */}
-            <EmptySearchResults
-              onAction={() => {
-                setSearchQuery("");
-                setHasSearched(false);
-              }}
-            />
           </View>
         )}
+
+        {/* Branch List */}
+        <View className="px-4 mt-4">
+          <Text className="text-text-primary text-md font-montserrat-semibold mb-3">
+            {searchQuery.trim() ? "Kết quả tìm kiếm" : "Tất cả tiệm"}
+          </Text>
+
+          {branchesLoading || locationLoading ? (
+            <View className="py-8">
+              <Text className="text-text-secondary text-sm font-montserrat-regular text-center">
+                Đang tải...
+              </Text>
+            </View>
+          ) : filteredBranches.length === 0 ? (
+            <View className="py-8">
+              <Text className="text-text-secondary text-sm font-montserrat-regular text-center">
+                {searchQuery.trim()
+                  ? "Không tìm thấy tiệm nào"
+                  : "Chưa có tiệm nào trong khu vực"}
+              </Text>
+            </View>
+          ) : (
+            <View className="gap-3 pb-4">
+              {filteredBranches.map((branch) => (
+                <ShopCard
+                  key={branch.id}
+                  id={branch.id.toString()}
+                  name={branch.name}
+                  address={branch.address?.addressText || ""}
+                  variant="compact"
+                  onPress={() => handleBranchPress(branch)}
+                />
+              ))}
+            </View>
+          )}
+        </View>
       </ScrollView>
     </View>
   );
