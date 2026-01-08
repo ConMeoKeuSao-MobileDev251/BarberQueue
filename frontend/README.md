@@ -1,50 +1,153 @@
-# Welcome to your Expo app 👋
+# BarberQueue Frontend
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Mobile application built with Expo and React Native for the BarberQueue booking platform.
 
-## Get started
+## Tech Stack
 
-1. Install dependencies
+| Category | Technology |
+|----------|------------|
+| Framework | Expo SDK 54, React Native 0.81 |
+| Language | TypeScript |
+| Styling | NativeWind (Tailwind CSS) |
+| State Management | Zustand |
+| Data Fetching | React Query (TanStack Query) |
+| Forms | React Hook Form + Zod |
+| Navigation | Expo Router |
+| Monitoring | Sentry |
 
-   ```bash
-   npm install
-   ```
+## Project Structure
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+frontend/
+├── app/                    # Screens (Expo Router file-based routing)
+│   ├── (auth)/             # Authentication screens
+│   ├── (client)/           # Client-facing screens
+│   └── (owner)/            # Owner dashboard screens
+├── src/
+│   ├── api/                # API client and endpoint functions
+│   ├── components/         # Reusable UI components
+│   ├── hooks/              # Custom React hooks
+│   ├── stores/             # Zustand state stores
+│   ├── types/              # TypeScript type definitions
+│   ├── utils/              # Utility functions
+│   └── i18n/               # Internationalization (vi/en)
+├── assets/                 # Images, fonts, icons
+└── constants/              # App constants and config
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Prerequisites
 
-## Learn more
+- Node.js 18+
+- npm or yarn
+- Expo CLI: `npm install -g expo-cli`
+- iOS Simulator (macOS) or Android Emulator
 
-To learn more about developing your project with Expo, look at the following resources:
+## Setup
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### 1. Install Dependencies
 
-## Join the community
+```bash
+npm install
+```
 
-Join our community of developers creating universal apps.
+### 2. Configure Environment
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local`:
+```env
+EXPO_PUBLIC_API_URL=http://localhost:3000
+```
+
+For physical device testing, use your machine's IP:
+```env
+EXPO_PUBLIC_API_URL=http://192.168.x.x:3000
+```
+
+### 3. Start Development Server
+
+```bash
+npm start
+```
+
+Then press:
+- `i` for iOS Simulator
+- `a` for Android Emulator
+- Scan QR code with Expo Go app for physical device
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start Expo development server |
+| `npm run android` | Run on Android |
+| `npm run ios` | Run on iOS |
+| `npm run web` | Run on web browser |
+| `npm test` | Run Jest tests |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run lint` | Run ESLint |
+
+## Testing
+
+Jest is configured with `jest-expo` preset.
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode
+npm run test:watch
+```
+
+Coverage target: **70%** on core modules (api, stores, utils, hooks).
+
+Coverage report generated at `coverage/lcov-report/index.html`.
+
+## Key Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `expo-router` | File-based routing |
+| `zustand` | Lightweight state management |
+| `@tanstack/react-query` | Server state and caching |
+| `react-hook-form` | Form handling |
+| `zod` | Schema validation |
+| `nativewind` | Tailwind CSS for React Native |
+| `expo-secure-store` | Secure token storage |
+| `expo-location` | Location services |
+| `@sentry/react-native` | Error tracking |
+
+## Build
+
+### Development Build
+
+```bash
+npx expo prebuild
+npx expo run:ios
+npx expo run:android
+```
+
+### Production Build (EAS)
+
+```bash
+npx eas build --platform ios
+npx eas build --platform android
+```
+
+## Project Conventions
+
+- **Components**: PascalCase (`BookingCard.tsx`)
+- **Hooks**: camelCase with `use` prefix (`useLocation.ts`)
+- **Stores**: kebab-case (`auth-store.ts`)
+- **API**: kebab-case (`bookings.ts`)
+- **Types**: PascalCase interfaces in `types/`
+
+## Related
+
+- [Main README](../README.md)
+- [Backend README](../backend/README.md)
