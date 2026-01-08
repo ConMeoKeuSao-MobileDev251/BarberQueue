@@ -10,16 +10,31 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  access_token: string;
-  user: User;
+  accessToken: string;
+  fullName: string;
+  phoneNumber: string;
+  role: UserRole;
 }
 
 export interface RegisterClientRequest {
   phoneNumber: string;
   password: string;
   fullName: string;
+  birthDate?: string;
   email?: string;
-  address?: CreateAddressRequest;
+  role?: "client";
+  addressText?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  password: string;
+  resetToken: string;
 }
 
 // ========== User ==========
@@ -88,7 +103,8 @@ export interface CreateServiceRequest {
 }
 
 // ========== Booking ==========
-export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
+export type BookingStatus = "pending" | "confirm" | "confirmed" | "completed" | "cancelled";
+export type BookingStatusAction = "confirm" | "complete" | "cancel";
 
 export interface Booking {
   id: number;
@@ -107,25 +123,79 @@ export interface Booking {
 }
 
 export interface CreateBookingRequest {
-  status: BookingStatus;
   startAt: string;
   endAt: string;
   totalDuration: number;
   totalPrice: number;
   clientId: number;
   staffId: number;
+  branchId: number;
 }
 
-export interface BookingHistoryResponse {
-  data: Booking[];
-  total: number;
-  page: number;
-  limit: number;
-}
+// API returns array directly
+export type BookingHistoryResponse = Booking[];
 
 export interface CreateBookingServiceRequest {
   bookingId: number;
   serviceId: number;
+}
+
+// ========== Review ==========
+export interface Review {
+  id: number;
+  bookingId: number;
+  branchId: number | null;
+  userId: number;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: User;
+}
+
+export interface CreateReviewRequest {
+  bookingId: number;
+  branchId?: number;
+  rating: number;
+  comment?: string;
+}
+
+export interface ReviewListResponse {
+  data: Review[];
+  total: number;
+  page: number;
+}
+
+// ========== Favorite ==========
+export interface Favorite {
+  userId: number;
+  branchId: number;
+  createdAt: string;
+  branch: Branch;
+}
+
+export interface FavoriteListResponse {
+  data: Favorite[];
+}
+
+// ========== Notification ==========
+export type NotificationType = "system" | "booking";
+
+export interface Notification {
+  id: number;
+  userId: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface NotificationListResponse {
+  data: Notification[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ========== Pagination ==========

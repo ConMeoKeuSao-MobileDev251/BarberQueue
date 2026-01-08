@@ -6,6 +6,8 @@ import type {
   LoginRequest,
   LoginResponse,
   RegisterClientRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
   User,
 } from "../types";
 
@@ -35,5 +37,26 @@ export const authApi = {
   getCurrentUser: async (): Promise<User> => {
     const response = await apiClient.get<User>("/auth/me");
     return response.data;
+  },
+
+  /**
+   * Request password reset email
+   */
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
+    await apiClient.post("/auth/forgot-password", data);
+  },
+
+  /**
+   * Reset password with token from email
+   */
+  resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
+    await apiClient.post("/auth/reset-password", data);
+  },
+
+  /**
+   * Logout and invalidate token server-side
+   */
+  logout: async (): Promise<void> => {
+    await apiClient.post("/auth/logout");
   },
 };

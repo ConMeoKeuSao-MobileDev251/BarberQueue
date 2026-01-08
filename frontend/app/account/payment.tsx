@@ -9,18 +9,28 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
+import { Image } from "expo-image";
+
 import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { ConfirmDialog } from "@/src/components/layout/modal";
 import { BottomSheet } from "@/src/components/layout/bottom-sheet";
 import { showToast } from "@/src/components/ui/toast";
 import { colors } from "@/src/constants/theme";
 
+// Payment method icons
+const PAYMENT_ICONS: Record<string, number> = {
+  cash: require("../../assets/icons/cash.png"),
+  momo: require("../../assets/icons/momo.png"),
+  vnpay: require("../../assets/icons/vnpay.jpg"),
+};
+
 interface PaymentMethod {
   id: string;
-  type: "apple_pay" | "cash" | "card";
+  type: "apple_pay" | "cash" | "card" | "momo" | "vnpay";
   label: string;
   details?: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap; // Fallback icon
+  customIcon?: number; // Local asset
 }
 
 // Mock payment methods data
@@ -36,9 +46,24 @@ const mockPaymentMethods: PaymentMethod[] = [
     type: "cash",
     label: "Tiền mặt",
     icon: "cash-outline",
+    customIcon: PAYMENT_ICONS.cash,
   },
   {
     id: "3",
+    type: "momo",
+    label: "MoMo",
+    icon: "wallet-outline",
+    customIcon: PAYMENT_ICONS.momo,
+  },
+  {
+    id: "4",
+    type: "vnpay",
+    label: "VNPay",
+    icon: "card-outline",
+    customIcon: PAYMENT_ICONS.vnpay,
+  },
+  {
+    id: "5",
     type: "card",
     label: "Visa",
     details: "•••• 4242",
@@ -48,11 +73,32 @@ const mockPaymentMethods: PaymentMethod[] = [
 
 // Payment type options for adding new
 const paymentTypeOptions = [
-  { id: "apple_pay", label: "Apple Pay", icon: "logo-apple" as const },
-  { id: "paypal", label: "PayPal", icon: "logo-paypal" as const },
+  { id: "momo", label: "Ví MoMo", icon: "wallet-outline" as const, customIcon: PAYMENT_ICONS.momo },
+  { id: "vnpay", label: "VNPay", icon: "card-outline" as const, customIcon: PAYMENT_ICONS.vnpay },
+  { id: "cash", label: "Tiền mặt", icon: "cash-outline" as const, customIcon: PAYMENT_ICONS.cash },
   { id: "card", label: "Thẻ tín dụng/ghi nợ", icon: "card-outline" as const },
-  { id: "gift", label: "Thẻ quà tặng", icon: "gift-outline" as const },
 ];
+
+// Payment icon component
+function PaymentIcon({ method }: { method: PaymentMethod }) {
+  if (method.customIcon) {
+    return (
+      <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center overflow-hidden">
+        <Image
+          source={method.customIcon}
+          style={{ width: 28, height: 28 }}
+          contentFit="contain"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center">
+      <Ionicons name={method.icon} size={20} color={colors.textPrimary} />
+    </View>
+  );
+}
 
 export default function PaymentMethodsScreen() {
   const { t } = useTranslation();
@@ -106,9 +152,7 @@ export default function PaymentMethodsScreen() {
               }`}
             >
               {/* Icon */}
-              <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center">
-                <Ionicons name={method.icon} size={20} color={colors.textPrimary} />
-              </View>
+              <PaymentIcon method={method} />
 
               {/* Label */}
               <View className="flex-1 ml-3">
@@ -183,9 +227,19 @@ export default function PaymentMethodsScreen() {
               onPress={() => handleAddPaymentType(option.id)}
               className="flex-row items-center py-4 border-b border-border-light"
             >
-              <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center">
-                <Ionicons name={option.icon} size={20} color={colors.textPrimary} />
-              </View>
+              {"customIcon" in option && option.customIcon ? (
+                <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center overflow-hidden">
+                  <Image
+                    source={option.customIcon}
+                    style={{ width: 28, height: 28 }}
+                    contentFit="contain"
+                  />
+                </View>
+              ) : (
+                <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center">
+                  <Ionicons name={option.icon} size={20} color={colors.textPrimary} />
+                </View>
+              )}
               <Text className="flex-1 ml-3 text-text-primary text-md font-montserrat-medium">
                 {option.label}
               </Text>

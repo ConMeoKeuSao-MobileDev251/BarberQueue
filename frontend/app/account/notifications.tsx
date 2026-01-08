@@ -1,102 +1,65 @@
 /**
  * Notifications Screen
- * View and manage notifications (UI only)
+ * View and manage notifications with API integration
  */
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
-import { useState, useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { notificationsApi } from "@/src/api/notifications";
+import type { Notification, NotificationType } from "@/src/types";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { EmptyState } from "@/src/components/ui/empty-state";
 import { colors } from "@/src/constants/theme";
 
-interface Notification {
-  id: string;
-  type: "booking" | "promo" | "system";
-  title: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-}
-
-// Mock notifications data
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "booking",
-    title: "Lịch hẹn sắp đến",
-    message: "Bạn có lịch hẹn cắt tóc vào 14:00 hôm nay tại Barbershop Premium.",
-    timestamp: "1 giờ trước",
-    isRead: false,
-  },
-  {
-    id: "2",
-    type: "promo",
-    title: "Ưu đãi đặc biệt! 🎉",
-    message: "Giảm 20% cho tất cả dịch vụ trong tuần này. Đặt ngay!",
-    timestamp: "3 giờ trước",
-    isRead: false,
-  },
-  {
-    id: "3",
-    type: "booking",
-    title: "Đặt lịch thành công",
-    message: "Bạn đã đặt lịch thành công với thợ Minh Tuấn vào T2, 30/12.",
-    timestamp: "Hôm qua",
-    isRead: true,
-  },
-  {
-    id: "4",
-    type: "system",
-    title: "Cập nhật ứng dụng",
-    message: "Phiên bản mới đã sẵn sàng với nhiều tính năng hấp dẫn.",
-    timestamp: "2 ngày trước",
-    isRead: true,
-  },
-  {
-    id: "5",
-    type: "promo",
-    title: "Happy New Year! 🎊",
-    message: "Chúc mừng năm mới! Nhận ngay voucher 50K cho đơn từ 200K.",
-    timestamp: "3 ngày trước",
-    isRead: true,
-  },
-];
-
 export default function NotificationsScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
 
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const [refreshing, setRefreshing] = useState(false);
+  // Fetch notifications
+  const {
+    data: notificationsData,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => notificationsApi.getAll({ page: 1, limit: 50 }),
+  });
 
+  const notifications = notificationsData?.data ?? [];
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setRefreshing(false);
-  }, []);
+  // Mark as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: notificationsApi.markAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+  const handleMarkAsRead = (id: number) => {
+    const notification = notifications.find((n) => n.id === id);
+    if (notification && !notification.isRead) {
+      markAsReadMutation.mutate(id);
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  const handleMarkAllAsRead = async () => {
+    const unreadNotifications = notifications.filter((n) => !n.isRead);
+    for (const notification of unreadNotifications) {
+      await notificationsApi.markAsRead(notification.id);
+    }
+    queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
 
-  const getNotificationIcon = (type: Notification["type"]): keyof typeof Ionicons.glyphMap => {
+  const getNotificationIcon = (type: NotificationType): keyof typeof Ionicons.glyphMap => {
     switch (type) {
       case "booking":
         return "calendar";
-      case "promo":
-        return "pricetag";
       case "system":
         return "settings";
       default:
@@ -104,17 +67,29 @@ export default function NotificationsScreen() {
     }
   };
 
-  const getNotificationColor = (type: Notification["type"]): string => {
+  const getNotificationColor = (type: NotificationType): string => {
     switch (type) {
       case "booking":
         return colors.primary;
-      case "promo":
-        return colors.success;
       case "system":
         return colors.textSecondary;
       default:
         return colors.primary;
     }
+  };
+
+  const formatTimestamp = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffHours < 1) return "Vừa xong";
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    if (diffDays === 1) return "Hôm qua";
+    if (diffDays < 7) return `${diffDays} ngày trước`;
+    return date.toLocaleDateString("vi-VN");
   };
 
   return (
@@ -132,12 +107,18 @@ export default function NotificationsScreen() {
         }
       />
 
-      {notifications.length > 0 ? (
+      {isLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-text-secondary text-sm font-montserrat-regular">
+            Đang tải...
+          </Text>
+        </View>
+      ) : notifications.length > 0 ? (
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
           }
         >
           {/* Unread Badge */}
@@ -152,7 +133,7 @@ export default function NotificationsScreen() {
 
           {/* Notifications List */}
           <View className="bg-white mt-4">
-            {notifications.map((notification, index) => (
+            {notifications.map((notification: Notification, index: number) => (
               <Pressable
                 key={notification.id}
                 onPress={() => handleMarkAsRead(notification.id)}
@@ -192,7 +173,7 @@ export default function NotificationsScreen() {
                     {notification.message}
                   </Text>
                   <Text className="text-text-tertiary text-xs font-montserrat-regular mt-2">
-                    {notification.timestamp}
+                    {formatTimestamp(notification.createdAt)}
                   </Text>
                 </View>
               </Pressable>

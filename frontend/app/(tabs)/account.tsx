@@ -5,11 +5,11 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useAuthStore } from "@/src/stores";
+import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { Avatar } from "@/src/components/ui/avatar";
 import { ConfirmDialog } from "@/src/components/layout/modal";
 import { colors } from "@/src/constants/theme";
@@ -26,7 +26,6 @@ interface MenuItem {
 export default function AccountScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
@@ -52,22 +51,10 @@ export default function AccountScreen() {
       route: "/account/payment",
     },
     {
-      id: "addresses",
-      label: t("account.addresses"),
-      icon: "business-outline",
-      route: "/account/addresses",
-    },
-    {
       id: "notifications",
       label: t("account.notifications"),
       icon: "notifications-outline",
       route: "/account/notifications",
-    },
-    {
-      id: "partner",
-      label: t("account.becomePartner"),
-      icon: "storefront-outline",
-      route: "/account/partner",
     },
     {
       id: "logout",
@@ -88,12 +75,12 @@ export default function AccountScreen() {
 
   return (
     <View className="flex-1 bg-background-secondary">
+      {/* Header with back button */}
+      <ScreenHeader title={t("account.title")} />
+
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile Section */}
-        <View
-          className="bg-white px-4 pb-6"
-          style={{ paddingTop: insets.top + 16 }}
-        >
+        <View className="bg-white px-4 py-4">
           <View className="flex-row items-center">
             {/* Avatar */}
             <Avatar

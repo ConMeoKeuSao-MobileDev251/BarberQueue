@@ -2,9 +2,9 @@
  * Order Details Screen
  * View detailed booking/order information with price breakdown
  */
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,13 +22,43 @@ export default function OrderDetailsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  const bookingId = parseInt(id || "0");
 
   // Fetch booking details
   const { data: booking, isLoading } = useQuery({
     queryKey: ["booking", id],
-    queryFn: () => bookingsApi.getById(parseInt(id || "0")),
+    queryFn: () => bookingsApi.getById(bookingId),
     enabled: !!id,
   });
+
+  // Cancel booking mutation
+  const cancelMutation = useMutation({
+    mutationFn: () => bookingsApi.changeStatus(bookingId, "cancel"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["booking", id] });
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      Alert.alert("Thành công", "Lịch hẹn đã được hủy.");
+    },
+    onError: () => {
+      Alert.alert("Lỗi", "Không thể hủy lịch hẹn. Vui lòng thử lại.");
+    },
+  });
+
+  const handleCancelBooking = () => {
+    Alert.alert(
+      t("booking.cancelConfirm"),
+      "Bạn có chắc chắn muốn hủy lịch hẹn này?",
+      [
+        { text: "Không", style: "cancel" },
+        {
+          text: "Hủy lịch",
+          style: "destructive",
+          onPress: () => cancelMutation.mutate(),
+        },
+      ]
+    );
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
@@ -278,7 +308,23 @@ export default function OrderDetailsScreen() {
         </View>
       </ScrollView>
 
-      {/* Bottom Button */}
+      {/* Bottom Button - Cancel for pending/confirmed, Reorder for completed/cancelled */}
+      {(booking.status === "pending" || booking.status === "confirmed") && (
+        <View
+          className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-4 border-t border-border-light"
+          style={{ paddingBottom: insets.bottom + 16 }}
+        >
+          <Button
+            variant="secondary"
+            onPress={handleCancelBooking}
+            fullWidth
+            disabled={cancelMutation.isPending}
+          >
+            {cancelMutation.isPending ? "Đang hủy..." : t("booking.cancel")}
+          </Button>
+        </View>
+      )}
+
       {(booking.status === "completed" || booking.status === "cancelled") && (
         <View
           className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-4 border-t border-border-light"

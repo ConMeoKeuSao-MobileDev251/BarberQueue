@@ -14,11 +14,6 @@ interface CartState {
   staffName: string | null;
   dateTime: string | null;
 
-  // Computed getters
-  readonly totalPrice: number;
-  readonly totalDuration: number;
-  readonly totalItems: number;
-
   // Actions
   addItem: (service: Service) => void;
   removeItem: (serviceId: number) => void;
@@ -37,25 +32,6 @@ export const useCartStore = create<CartState>()((set, get) => ({
   staffId: null,
   staffName: null,
   dateTime: null,
-
-  // Computed getters
-  get totalPrice() {
-    return get().items.reduce(
-      (sum, item) => sum + item.service.price * item.quantity,
-      0
-    );
-  },
-
-  get totalDuration() {
-    return get().items.reduce(
-      (sum, item) => sum + item.service.duration * item.quantity,
-      0
-    );
-  },
-
-  get totalItems() {
-    return get().items.reduce((sum, item) => sum + item.quantity, 0);
-  },
 
   // Add service to cart
   addItem: (service) => {
@@ -129,7 +105,24 @@ export const useCartStore = create<CartState>()((set, get) => ({
   },
 }));
 
-// Selector hooks
+// Reactive selector hooks - these compute values from items and update reactively
 export const useCartItems = () => useCartStore((state) => state.items);
-export const useCartTotal = () => useCartStore((state) => state.totalPrice);
-export const useCartItemCount = () => useCartStore((state) => state.totalItems);
+
+export const useCartTotalPrice = () =>
+  useCartStore((state) =>
+    state.items.reduce((sum, item) => sum + item.service.price * item.quantity, 0)
+  );
+
+export const useCartTotalDuration = () =>
+  useCartStore((state) =>
+    state.items.reduce((sum, item) => sum + item.service.duration * item.quantity, 0)
+  );
+
+export const useCartTotalItems = () =>
+  useCartStore((state) =>
+    state.items.reduce((sum, item) => sum + item.quantity, 0)
+  );
+
+// Legacy aliases for backward compatibility
+export const useCartTotal = useCartTotalPrice;
+export const useCartItemCount = useCartTotalItems;

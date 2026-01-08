@@ -4,7 +4,7 @@
  */
 import { useEffect } from "react";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -31,7 +31,7 @@ import "@/src/i18n";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 // Stores
-import { useAppStore } from "@/src/stores";
+import { useAppStore, useAuthStore } from "@/src/stores";
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -42,8 +42,13 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
   const initialize = useAppStore((state) => state.initialize);
   const isInitialized = useAppStore((state) => state.isInitialized);
+  const onboardingComplete = useAppStore((state) => state.onboardingComplete);
+  const restoreAuth = useAuthStore((state) => state.restoreAuth);
+  const isAuthLoading = useAuthStore((state) => state.isLoading);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // Load fonts
   const [fontsLoaded] = useFonts({
@@ -54,20 +59,33 @@ export default function RootLayout() {
     "Montserrat-Bold": Montserrat_700Bold,
   });
 
-  // Initialize app state
+  // Initialize app state and restore auth
   useEffect(() => {
     initialize();
-  }, [initialize]);
+    restoreAuth();
+  }, [initialize, restoreAuth]);
 
   // Hide splash screen when ready
   useEffect(() => {
-    if (fontsLoaded && isInitialized) {
+    if (fontsLoaded && isInitialized && !isAuthLoading) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, isInitialized]);
+  }, [fontsLoaded, isInitialized, isAuthLoading]);
+
+  // Auth guard - redirect based on auth state
+  useEffect(() => {
+    if (!fontsLoaded || !isInitialized || isAuthLoading) return;
+
+    if (!onboardingComplete) {
+      router.replace("/(onboarding)");
+    } else if (!isAuthenticated) {
+      router.replace("/(auth)/login");
+    }
+    // If authenticated, stay on current route (tabs)
+  }, [fontsLoaded, isInitialized, isAuthLoading, isAuthenticated, onboardingComplete, router]);
 
   // Show nothing while loading
-  if (!fontsLoaded || !isInitialized) {
+  if (!fontsLoaded || !isInitialized || isAuthLoading) {
     return null;
   }
 

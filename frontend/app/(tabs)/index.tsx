@@ -10,9 +10,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
+import { Image } from "expo-image";
+
 import { branchesApi } from "@/src/api/branches";
 import { useAuthStore } from "@/src/stores";
+import type { Branch } from "@/src/types";
+import { useLocation } from "@/src/hooks";
 import { Avatar } from "@/src/components/ui/avatar";
+import { BarberQueueLogo } from "@/src/components/ui/barberqueue-logo";
 import { SearchInput } from "@/src/components/ui/search-input";
 import { ShopCard } from "@/src/components/shared/shop-card";
 import { FilterChips } from "@/src/components/shared/filter-chips";
@@ -20,11 +25,8 @@ import { SkeletonShopCard } from "@/src/components/ui/skeleton";
 import { EmptySearchResults } from "@/src/components/ui/empty-state";
 import { colors } from "@/src/constants/theme";
 
-// Default location (Ho Chi Minh City center)
-const DEFAULT_LOCATION = {
-  latitude: 10.7769,
-  longitude: 106.7009,
-};
+// Local assets
+const couponImage = require("../../assets/images/coupon-image.png");
 
 // Filter options
 const filterOptions = [
@@ -42,32 +44,41 @@ export default function HomeScreen() {
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch nearby branches
+  // Get user's current location
+  const {
+    coords,
+    locationName,
+    isLoading: locationLoading,
+    refresh: refreshLocation,
+  } = useLocation();
+
+  // Fetch nearby branches - starts with default location, auto-refetches when real location arrives
   const {
     data: branches,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["branches", DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude],
+    queryKey: ["branches", coords.latitude, coords.longitude],
     queryFn: () =>
-      branchesApi.searchByLocation(
-        DEFAULT_LOCATION.latitude,
-        DEFAULT_LOCATION.longitude
-      ),
+      branchesApi.searchByLocation(coords.latitude, coords.longitude),
   });
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    await refreshLocation();
     await refetch();
     setRefreshing(false);
-  }, [refetch]);
+  }, [refetch, refreshLocation]);
 
   const handleSearchPress = () => {
     router.push("/(tabs)/search" as never);
   };
 
-  const handleShopPress = (branchId: number) => {
-    router.push(`/shop/${branchId}` as never);
+  const handleShopPress = (branch: Branch) => {
+    router.push({
+      pathname: `/shop/${branch.id}`,
+      params: { branchData: JSON.stringify(branch) },
+    } as never);
   };
 
   const handleNotificationPress = () => {
@@ -82,28 +93,36 @@ export default function HomeScreen() {
         style={{ paddingTop: insets.top + 8 }}
       >
         <View className="flex-row items-center justify-between mb-4">
-          {/* User Avatar */}
-          <Avatar
-            source={null}
-            name={user?.fullName || "User"}
-            size="md"
-          />
+          {/* User Avatar → Account */}
+          <Pressable onPress={() => router.push("/(tabs)/account")}>
+            <Avatar
+              source={null}
+              name={user?.fullName || "User"}
+              size="md"
+            />
+          </Pressable>
 
           {/* Logo */}
-          <View className="flex-row items-center">
-            <Ionicons name="cut" size={24} color={colors.primary} />
-            <Text className="text-primary text-lg font-montserrat-bold ml-2">
-              BarberQueue
-            </Text>
-          </View>
+          <BarberQueueLogo size="md" />
 
-          {/* Notification Bell */}
-          <Pressable
-            onPress={handleNotificationPress}
-            className="w-10 h-10 items-center justify-center"
-          >
-            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
-          </Pressable>
+          {/* Right Icons */}
+          <View className="flex-row items-center gap-1">
+            {/* Bookings */}
+            <Pressable
+              onPress={() => router.push("/(tabs)/bookings")}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <Ionicons name="calendar-outline" size={24} color={colors.textPrimary} />
+            </Pressable>
+
+            {/* Notifications */}
+            <Pressable
+              onPress={handleNotificationPress}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
+            </Pressable>
+          </View>
         </View>
 
         {/* Greeting */}
@@ -115,10 +134,13 @@ export default function HomeScreen() {
         </Text>
 
         {/* Location Selector */}
-        <Pressable className="flex-row items-center mt-2">
+        <Pressable
+          className="flex-row items-center mt-2"
+          onPress={refreshLocation}
+        >
           <Ionicons name="location-outline" size={16} color={colors.primary} />
           <Text className="text-primary text-sm font-montserrat-medium ml-1">
-            Quận 1, TP.HCM
+            {locationLoading ? "Đang xác định..." : locationName || "TP. Hồ Chí Minh"}
           </Text>
           <Ionicons name="chevron-down" size={16} color={colors.primary} />
         </Pressable>
@@ -168,14 +190,23 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {/* Promo Card Placeholder */}
-          <View className="bg-primary rounded-xl p-4 h-32 justify-end">
-            <Text className="text-white text-lg font-montserrat-bold">
-              Giảm 20% lần đầu
-            </Text>
-            <Text className="text-white/80 text-sm font-montserrat-regular mt-1">
-              Áp dụng cho tất cả dịch vụ
-            </Text>
+          {/* Promo Card */}
+          <View className="rounded-xl h-32 overflow-hidden relative">
+            <Image
+              source={couponImage}
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
+            />
+            {/* Overlay gradient for text readability */}
+            <View className="absolute inset-0 bg-black/30" />
+            <View className="absolute bottom-0 left-0 right-0 p-4">
+              <Text className="text-white text-lg font-montserrat-bold">
+                Giảm 20% lần đầu
+              </Text>
+              <Text className="text-white/80 text-sm font-montserrat-regular mt-1">
+                Áp dụng cho tất cả dịch vụ
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -207,11 +238,9 @@ export default function HomeScreen() {
                   id={branch.id.toString()}
                   name={branch.name}
                   address={branch.address?.addressText || ""}
-                  rating={4.5}
-                  reviewCount={120}
                   image={null}
                   isOpen={true}
-                  onPress={() => handleShopPress(branch.id)}
+                  onPress={() => handleShopPress(branch)}
                 />
               ))}
             </View>

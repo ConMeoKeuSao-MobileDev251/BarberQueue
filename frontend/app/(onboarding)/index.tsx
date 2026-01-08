@@ -22,23 +22,28 @@ import { useTranslation } from "react-i18next";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+// Local onboarding images
+const onboardingImage1 = require("../../assets/images/onboarding-image-1.png");
+const onboardingImage2 = require("../../assets/images/onboarding-image-2.png");
+const onboardingImage3 = require("../../assets/images/onboarding-image-3.jpg");
+
 // Onboarding slides data
 const slides = [
   {
     id: "1",
-    image: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=800&h=1200&fit=crop",
+    image: onboardingImage1,
     titleKey: "onboarding.slide1.title",
     descriptionKey: "onboarding.slide1.description",
   },
   {
     id: "2",
-    image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&h=1200&fit=crop",
+    image: onboardingImage2,
     titleKey: "onboarding.slide2.title",
     descriptionKey: "onboarding.slide2.description",
   },
   {
     id: "3",
-    image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=800&h=1200&fit=crop",
+    image: onboardingImage3,
     titleKey: "onboarding.slide3.title",
     descriptionKey: "onboarding.slide3.description",
   },
@@ -172,7 +177,7 @@ function SlideItem({ slide, index, scrollX, t }: SlideItemProps) {
       {/* Background Image */}
       <Animated.View style={[{ flex: 1 }, animatedStyle]}>
         <Image
-          source={{ uri: slide.image }}
+          source={slide.image}
           style={{ width: "100%", height: "100%" }}
           contentFit="cover"
           transition={300}

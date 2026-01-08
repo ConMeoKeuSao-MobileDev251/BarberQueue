@@ -17,11 +17,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textTertiary,
         tabBarStyle: {
-          backgroundColor: colors.backgroundPrimary,
-          borderTopColor: colors.borderLight,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          display: "none", // Hidden - navigation via header elements
         },
         tabBarLabelStyle: {
           fontFamily: "Montserrat-Medium",

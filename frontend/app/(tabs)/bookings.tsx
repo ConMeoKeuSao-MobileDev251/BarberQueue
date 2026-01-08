@@ -5,12 +5,14 @@
 import { View, Text, ScrollView, RefreshControl } from "react-native";
 import { useState, useCallback } from "react";
 import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { bookingsApi } from "@/src/api/bookings";
 import { useAuthStore } from "@/src/stores";
+import { showToast } from "@/src/components/ui/toast";
+import type { Booking } from "@/src/types";
+import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { CategoryTabs } from "@/src/components/shared/filter-chips";
 import { BookingCard } from "@/src/components/shared/booking-card";
 import { SkeletonCard } from "@/src/components/ui/skeleton";
@@ -28,7 +30,7 @@ const tabs = [
 export default function BookingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
 
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
@@ -36,16 +38,28 @@ export default function BookingsScreen() {
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
 
-  // Fetch bookings
+  // Fetch bookings - API returns array directly
   const {
     data: bookings,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["bookings", user?.id, activeTab],
-    queryFn: () =>
-      bookingsApi.getHistory("client", user?.id || 0, { page: 1, limit: 20 }),
-    enabled: !!user?.id,
+    queryKey: ["bookings"],
+    queryFn: () => bookingsApi.getHistory({ page: 1, limit: 50 }),
+  });
+
+  // Cancel booking mutation
+  const cancelMutation = useMutation({
+    mutationFn: (bookingId: number) => bookingsApi.changeStatus(bookingId, "cancel"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      setCancelModalVisible(false);
+      setSelectedBookingId(null);
+      showToast("Đã hủy lịch hẹn", "success");
+    },
+    onError: () => {
+      showToast("Không thể hủy lịch hẹn", "error");
+    },
   });
 
   const onRefresh = useCallback(async () => {
@@ -63,11 +77,10 @@ export default function BookingsScreen() {
     setCancelModalVisible(true);
   };
 
-  const handleConfirmCancel = async () => {
-    // TODO: Implement cancel booking mutation
-    setCancelModalVisible(false);
-    setSelectedBookingId(null);
-    refetch();
+  const handleConfirmCancel = () => {
+    if (selectedBookingId) {
+      cancelMutation.mutate(selectedBookingId);
+    }
   };
 
   const handleRebook = (bookingId: number) => {
@@ -75,8 +88,8 @@ export default function BookingsScreen() {
     router.push("/(tabs)");
   };
 
-  // Filter bookings based on active tab
-  const filteredBookings = bookings?.data.filter((booking) => {
+  // Filter bookings based on active tab (API returns array directly)
+  const filteredBookings: Booking[] = bookings?.filter((booking: Booking) => {
     const now = new Date();
     const bookingDate = new Date(booking.startAt);
 
@@ -103,16 +116,11 @@ export default function BookingsScreen() {
 
   return (
     <View className="flex-1 bg-background-secondary">
-      {/* Header */}
-      <View
-        className="bg-white px-4 pb-4"
-        style={{ paddingTop: insets.top + 8 }}
-      >
-        <Text className="text-text-primary text-2xl font-montserrat-bold mb-4">
-          {t("booking.history")}
-        </Text>
+      {/* Header with back button */}
+      <ScreenHeader title={t("booking.history")} />
 
-        {/* Tabs */}
+      {/* Tabs */}
+      <View className="bg-white px-4 pb-4">
         <CategoryTabs
           categories={tabs}
           selected={activeTab}

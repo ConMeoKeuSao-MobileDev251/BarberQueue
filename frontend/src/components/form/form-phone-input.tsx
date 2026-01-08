@@ -1,10 +1,10 @@
 /**
  * Form Phone Input Component
- * Phone number input with country code prefix
+ * Phone number input (10 digits) using useController hook
  */
-import { TextInput as RNTextInput, View, Text, Pressable } from "react-native";
-import { Control, Controller, FieldValues, Path } from "react-hook-form";
-import { useState } from "react";
+import { TextInput as RNTextInput, View, Text } from "react-native";
+import { Control, useController, FieldValues, Path } from "react-hook-form";
+import { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/src/constants/theme";
 
@@ -13,111 +13,103 @@ interface FormPhoneInputProps<T extends FieldValues> {
   name: Path<T>;
   label?: string;
   placeholder?: string;
-  countryCode?: string;
-  rules?: object;
 }
 
 export function FormPhoneInput<T extends FieldValues>({
   control,
   name,
   label,
-  placeholder = "Nhập số điện thoại",
-  countryCode = "+84",
-  rules,
+  placeholder = "0123 456 789",
 }: FormPhoneInputProps<T>) {
   const [isFocused, setIsFocused] = useState(false);
 
-  // Format phone number with spacing
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, "");
+  const {
+    field: { onChange, onBlur, value },
+    fieldState: { error, invalid },
+  } = useController({ control, name });
 
-    // Format: XXX XXX XXXX
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
-    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 10)}`;
+  // Format phone number with spacing (0XXX XXX XXX)
+  const formatPhoneNumber = (val: string) => {
+    const digits = val.replace(/\D/g, "");
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 4)} ${digits.slice(4)}`;
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 10)}`;
   };
 
-  // Clean phone number (remove spaces)
-  const cleanPhoneNumber = (value: string) => {
-    return value.replace(/\s/g, "");
+  const handleChangeText = useCallback(
+    (text: string) => {
+      const cleaned = text.replace(/\s/g, "");
+      if (cleaned.length <= 10) {
+        onChange(cleaned);
+      }
+    },
+    [onChange]
+  );
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    onBlur();
+  }, [onBlur]);
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  // Determine container style based on state
+  const getContainerStyle = () => {
+    if (error) return "bg-white border border-coral";
+    if (isFocused) return "bg-white border border-primary";
+    return "bg-white border border-gray-300";
   };
 
   return (
-    <Controller
-      control={control}
-      name={name}
-      rules={rules}
-      render={({ field: { onChange, onBlur, value }, fieldState: { error, invalid } }) => {
-        const getBorderColor = () => {
-          if (error) return "border-coral";
-          if (isFocused) return "border-primary";
-          return "border-border-medium";
-        };
+    <View className="w-full">
+      {label && (
+        <Text className="text-text-primary text-sm font-montserrat-medium mb-2">
+          {label}
+        </Text>
+      )}
 
-        return (
-          <View className="w-full">
-            {label && (
-              <Text className="text-text-primary text-sm font-montserrat-medium mb-2">
-                {label}
-              </Text>
-            )}
+      <View
+        className={`flex-row items-center h-14 px-4 rounded-lg ${getContainerStyle()}`}
+      >
+        {/* Phone icon */}
+        <Ionicons
+          name="call-outline"
+          size={20}
+          color={colors.textTertiary}
+          style={{ marginRight: 12 }}
+        />
 
-            <View
-              className={`flex-row items-center h-14 border rounded-lg bg-white ${getBorderColor()}`}
-            >
-              {/* Country code prefix */}
-              <Pressable className="flex-row items-center px-4 h-full border-r border-border-light">
-                <Text className="text-md font-montserrat-medium text-text-primary">
-                  {countryCode}
-                </Text>
-                <Ionicons
-                  name="chevron-down"
-                  size={16}
-                  color={colors.textSecondary}
-                  style={{ marginLeft: 4 }}
-                />
-              </Pressable>
+        {/* Phone input */}
+        <RNTextInput
+          value={formatPhoneNumber(value || "")}
+          onChangeText={handleChangeText}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          placeholder={placeholder}
+          placeholderTextColor={colors.textTertiary}
+          keyboardType="phone-pad"
+          maxLength={12}
+          style={{
+            flex: 1,
+            color: colors.textPrimary,
+            fontSize: 16,
+            fontFamily: "Montserrat-Regular",
+          }}
+        />
 
-              {/* Phone input */}
-              <RNTextInput
-                value={formatPhoneNumber(value || "")}
-                onChangeText={(text) => {
-                  const cleaned = cleanPhoneNumber(text);
-                  // Only allow up to 10 digits
-                  if (cleaned.length <= 10) {
-                    onChange(cleaned);
-                  }
-                }}
-                onBlur={() => {
-                  setIsFocused(false);
-                  onBlur();
-                }}
-                onFocus={() => setIsFocused(true)}
-                placeholder={placeholder}
-                placeholderTextColor={colors.textTertiary}
-                keyboardType="phone-pad"
-                className="flex-1 px-4 text-text-primary text-md font-montserrat-regular"
-                style={{ fontFamily: "Montserrat-Regular" }}
-                maxLength={12} // 10 digits + 2 spaces
-              />
+        {/* Valid checkmark */}
+        {!invalid && value && value.length === 10 && (
+          <Ionicons name="checkmark-circle" size={22} color={colors.success} />
+        )}
+      </View>
 
-              {/* Valid checkmark */}
-              {!invalid && value && value.length >= 9 && (
-                <View className="pr-4">
-                  <Ionicons name="checkmark-circle" size={22} color={colors.success} />
-                </View>
-              )}
-            </View>
-
-            {error && (
-              <Text className="text-coral text-sm font-montserrat-regular mt-1">
-                {error.message}
-              </Text>
-            )}
-          </View>
-        );
-      }}
-    />
+      {error && (
+        <Text className="text-coral text-sm font-montserrat-regular mt-1">
+          {error.message}
+        </Text>
+      )}
+    </View>
   );
 }

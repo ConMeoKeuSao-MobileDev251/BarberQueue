@@ -9,6 +9,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Rating } from "@/src/components/ui/rating";
 import { colors } from "@/src/constants/theme";
 
+// Default shop thumbnail image
+const shopThumbnail = require("@/assets/images/shop-thumbnail.png");
+
 interface ShopCardProps {
   id: string;
   name: string;
@@ -49,18 +52,12 @@ function ShopCardComponent({
       >
         {/* Image */}
         <View className="w-20 h-20">
-          {image ? (
-            <Image
-              source={{ uri: image }}
-              style={{ width: "100%", height: "100%" }}
-              contentFit="cover"
-              transition={200}
-            />
-          ) : (
-            <View className="flex-1 bg-primary-light items-center justify-center">
-              <Ionicons name="storefront" size={28} color={colors.primary} />
-            </View>
-          )}
+          <Image
+            source={image ? { uri: image } : shopThumbnail}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+            transition={200}
+          />
         </View>
 
         {/* Content */}
@@ -69,9 +66,12 @@ function ShopCardComponent({
             {name}
           </Text>
 
-          <View className="flex-row items-center mt-1">
-            <Rating score={rating} count={reviewCount} size="sm" />
-          </View>
+          {/* Only show rating if data exists */}
+          {rating !== undefined && rating > 0 && reviewCount !== undefined && reviewCount > 0 && (
+            <View className="flex-row items-center mt-1">
+              <Rating score={rating} count={reviewCount} size="sm" />
+            </View>
+          )}
 
           <View className="flex-row items-center mt-1">
             <Ionicons name="location-outline" size={12} color={colors.textTertiary} />
@@ -103,18 +103,12 @@ function ShopCardComponent({
     >
       {/* Image */}
       <View className="h-40 relative">
-        {image ? (
-          <Image
-            source={{ uri: image }}
-            style={{ width: "100%", height: "100%" }}
-            contentFit="cover"
-            transition={200}
-          />
-        ) : (
-          <View className="flex-1 bg-primary-light items-center justify-center">
-            <Ionicons name="storefront" size={48} color={colors.primary} />
-          </View>
-        )}
+        <Image
+          source={image ? { uri: image } : shopThumbnail}
+          style={{ width: "100%", height: "100%" }}
+          contentFit="cover"
+          transition={200}
+        />
 
         {/* Status badge */}
         <View
@@ -155,9 +149,12 @@ function ShopCardComponent({
           {name}
         </Text>
 
-        <View className="flex-row items-center mt-2">
-          <Rating score={rating} count={reviewCount} size="sm" />
-        </View>
+        {/* Only show rating if data exists */}
+        {rating !== undefined && rating > 0 && reviewCount !== undefined && reviewCount > 0 && (
+          <View className="flex-row items-center mt-2">
+            <Rating score={rating} count={reviewCount} size="sm" />
+          </View>
+        )}
 
         <View className="flex-row items-center mt-2">
           <Ionicons name="location-outline" size={14} color={colors.textTertiary} />

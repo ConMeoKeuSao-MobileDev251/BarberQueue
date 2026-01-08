@@ -8,3 +8,6 @@ export { servicesApi } from "./services";
 export { bookingsApi } from "./bookings";
 export { addressesApi } from "./addresses";
 export { usersApi } from "./users";
+export { reviewsApi } from "./reviews";
+export { favoritesApi } from "./favorites";
+export { notificationsApi } from "./notifications";
