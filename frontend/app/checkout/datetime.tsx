@@ -10,7 +10,10 @@ import { useTranslation } from "react-i18next";
 
 import { useCartStore } from "@/src/stores";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
-import { TimeSlotGrid, generateTimeSlots } from "@/src/components/shared/time-slot-grid";
+import {
+  TimeSlotGrid,
+  generateTimeSlots,
+} from "@/src/components/shared/time-slot-grid";
 import { Button } from "@/src/components/ui/button";
 
 // Generate next 7 days
@@ -44,7 +47,35 @@ export default function DateTimeScreen() {
   // Generate time slots (9 AM to 9 PM, 30 min intervals)
   const timeSlots = useMemo(() => {
     // Simulate some unavailable times
-    const unavailable = ["12:00", "12:30", "18:00"];
+    const baseUnavailable = ["12:00", "12:30", "18:00"];
+
+    const now = new Date();
+    const isToday =
+      selectedDate.getDate() === now.getDate() &&
+      selectedDate.getMonth() === now.getMonth() &&
+      selectedDate.getFullYear() === now.getFullYear();
+
+    const pastTimesToday: string[] = [];
+    if (isToday) {
+      const allTimes = generateTimeSlots(9, 21, 30).map((s) => s.time);
+      for (const time of allTimes) {
+        const [hoursStr, minutesStr] = time.split(":");
+        const hours = Number(hoursStr);
+        const minutes = Number(minutesStr);
+
+        const slotDate = new Date(selectedDate);
+        slotDate.setHours(hours, minutes, 0, 0);
+
+        // Disable any slot that starts before the current time.
+        if (slotDate.getTime() < now.getTime()) {
+          pastTimesToday.push(time);
+        }
+      }
+    }
+
+    const unavailable = Array.from(
+      new Set([...baseUnavailable, ...pastTimesToday])
+    );
     return generateTimeSlots(9, 21, 30, unavailable);
   }, [selectedDate]);
 
@@ -68,7 +99,10 @@ export default function DateTimeScreen() {
     <View className="flex-1 bg-background-secondary">
       <ScreenHeader title={t("checkout.selectDate")} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
         {/* Stylist Info */}
         {staffName && (
           <View className="bg-white px-4 py-3 border-b border-border-light">

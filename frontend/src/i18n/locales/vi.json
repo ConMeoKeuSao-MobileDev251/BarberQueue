@@ -18,7 +18,7 @@
   },
   "auth": {
     "login": "Đăng nhập",
-    "register": "Đăng ký",
+    "register": "Đăng kí",
     "logout": "Đăng xuất",
     "phoneNumber": "Số điện thoại",
     "password": "Mật khẩu",
@@ -29,7 +29,10 @@
     "haveAccount": "Đã có tài khoản?",
     "loginSuccess": "Đăng nhập thành công",
     "registerSuccess": "Đăng ký thành công",
-    "logoutConfirm": "Bạn có chắc muốn đăng xuất?"
+    "logoutConfirm": "Bạn có chắc muốn đăng xuất?",
+    "welcomeBack": "Chào mừng trở lại",
+    "createAccount": "Tạo tài khoản",
+    "bookInSeconds": "Đặt lịch chỉ trong 1 phút"
   },
   "onboarding": {
     "slide1": {
@@ -67,7 +70,7 @@
     "share": "Chia sẻ"
   },
   "checkout": {
-    "title": "Check out",
+    "title": " 1",
     "selectStylist": "Chọn thợ",
     "selectDate": "Chọn ngày",
     "selectTime": "Chọn giờ",

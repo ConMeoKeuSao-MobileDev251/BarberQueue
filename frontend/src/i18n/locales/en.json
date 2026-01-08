@@ -29,7 +29,10 @@
     "haveAccount": "Already have an account?",
     "loginSuccess": "Login successful",
     "registerSuccess": "Registration successful",
-    "logoutConfirm": "Are you sure you want to logout?"
+    "logoutConfirm": "Are you sure you want to logout?",
+    "welcomeBack": "Welcome back",
+    "createAccount": "Create account",
+    "bookInSeconds": "Book in seconds"
   },
   "onboarding": {
     "slide1": {

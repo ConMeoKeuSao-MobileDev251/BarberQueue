@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SearchInput } from "@/src/components/ui/search-input";
 import { EmptySearchResults } from "@/src/components/ui/empty-state";
 import { colors } from "@/src/constants/theme";
+import { useLocation } from "@/src/hooks";
 
 const RECENT_SEARCHES_KEY = "@barberqueue:recent_searches";
 const MAX_RECENT_SEARCHES = 10;
@@ -20,7 +21,7 @@ const MAX_RECENT_SEARCHES = 10;
 // Hot services placeholder data
 const hotServices = [
   { id: "1", name: "Cắt tóc", icon: "cut" as const },
-  { id: "2", name: "Uốn tóc", icon: "sync" as const },
+  { id: "2", name: "Uốn tóc", icon: "color-wand" as const },
   { id: "3", name: "Nhuộm", icon: "color-palette" as const },
   { id: "4", name: "Gội đầu", icon: "water" as const },
   { id: "5", name: "Tạo kiểu", icon: "sparkles" as const },
@@ -31,6 +32,11 @@ export default function SearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const {
+    locationName,
+    isLoading: locationLoading,
+    refresh: refreshLocation,
+  } = useLocation();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
@@ -52,23 +58,29 @@ export default function SearchScreen() {
   }, []);
 
   // Save recent search to AsyncStorage
-  const saveRecentSearch = useCallback(async (query: string) => {
-    try {
-      const trimmedQuery = query.trim();
-      if (!trimmedQuery) return;
+  const saveRecentSearch = useCallback(
+    async (query: string) => {
+      try {
+        const trimmedQuery = query.trim();
+        if (!trimmedQuery) return;
 
-      // Remove duplicate and add to front
-      const updatedSearches = [
-        trimmedQuery,
-        ...recentSearches.filter((s) => s !== trimmedQuery),
-      ].slice(0, MAX_RECENT_SEARCHES);
+        // Remove duplicate and add to front
+        const updatedSearches = [
+          trimmedQuery,
+          ...recentSearches.filter((s) => s !== trimmedQuery),
+        ].slice(0, MAX_RECENT_SEARCHES);
 
-      setRecentSearches(updatedSearches);
-      await AsyncStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updatedSearches));
-    } catch (error) {
-      console.error("Failed to save recent search:", error);
-    }
-  }, [recentSearches]);
+        setRecentSearches(updatedSearches);
+        await AsyncStorage.setItem(
+          RECENT_SEARCHES_KEY,
+          JSON.stringify(updatedSearches)
+        );
+      } catch (error) {
+        console.error("Failed to save recent search:", error);
+      }
+    },
+    [recentSearches]
+  );
 
   const handleSearch = useCallback(() => {
     if (searchQuery.trim()) {
@@ -87,21 +99,30 @@ export default function SearchScreen() {
     }
   }, []);
 
-  const handleRemoveRecentSearch = useCallback(async (query: string) => {
-    try {
-      const updatedSearches = recentSearches.filter((s) => s !== query);
-      setRecentSearches(updatedSearches);
-      await AsyncStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updatedSearches));
-    } catch (error) {
-      console.error("Failed to remove recent search:", error);
-    }
-  }, [recentSearches]);
+  const handleRemoveRecentSearch = useCallback(
+    async (query: string) => {
+      try {
+        const updatedSearches = recentSearches.filter((s) => s !== query);
+        setRecentSearches(updatedSearches);
+        await AsyncStorage.setItem(
+          RECENT_SEARCHES_KEY,
+          JSON.stringify(updatedSearches)
+        );
+      } catch (error) {
+        console.error("Failed to remove recent search:", error);
+      }
+    },
+    [recentSearches]
+  );
 
-  const handleRecentSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    saveRecentSearch(query);
-    setHasSearched(true);
-  }, [saveRecentSearch]);
+  const handleRecentSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      saveRecentSearch(query);
+      setHasSearched(true);
+    },
+    [saveRecentSearch]
+  );
 
   return (
     <View className="flex-1 bg-background-secondary">
@@ -111,13 +132,22 @@ export default function SearchScreen() {
         style={{ paddingTop: insets.top + 8 }}
       >
         {/* Location */}
-        <Pressable className="flex-row items-center mb-4">
-          <Ionicons name="location" size={18} color={colors.primary} />
-          <Text className="text-text-primary text-sm font-montserrat-medium ml-2 flex-1">
-            Quận 1, TP.HCM
-          </Text>
-          <Ionicons name="close" size={24} color={colors.textSecondary} />
-        </Pressable>
+        <View className="flex-row items-center mb-4">
+          <Pressable
+            className="flex-row items-center flex-1"
+            onPress={refreshLocation}
+          >
+            <Ionicons name="location" size={18} color={colors.primary} />
+            <Text className="text-text-primary text-sm font-montserrat-medium ml-2">
+              {locationLoading
+                ? "Đang xác định..."
+                : locationName || "TP. Hồ Chí Minh"}
+            </Text>
+          </Pressable>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="close" size={24} color={colors.textSecondary} />
+          </Pressable>
+        </View>
 
         {/* Search Input */}
         <SearchInput
@@ -151,10 +181,7 @@ export default function SearchScreen() {
 
                 <View className="gap-2">
                   {recentSearches.map((search, index) => (
-                    <View
-                      key={index}
-                      className="flex-row items-center py-3"
-                    >
+                    <View key={index} className="flex-row items-center py-3">
                       <Pressable
                         onPress={() => handleRecentSearch(search)}
                         className="flex-row items-center flex-1"
@@ -192,10 +219,7 @@ export default function SearchScreen() {
 
               <View className="flex-row flex-wrap gap-3">
                 {hotServices.map((service) => (
-                  <Pressable
-                    key={service.id}
-                    className="items-center w-20"
-                  >
+                  <Pressable key={service.id} className="items-center w-20">
                     <View className="w-16 h-16 rounded-full bg-primary-light items-center justify-center mb-2">
                       <Ionicons
                         name={service.icon}

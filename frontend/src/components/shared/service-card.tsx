@@ -86,7 +86,7 @@ function ServiceCardComponent({
             <Text className="text-md font-montserrat-bold text-primary">
               {formatPrice(price)}
             </Text>
-            <View className="flex-row items-center">
+            <View className="flex-row items-center mr-10">
               <Ionicons name="time-outline" size={14} color={colors.textTertiary} />
               <Text className="text-xs font-montserrat-regular text-text-tertiary ml-1">
                 {formatDuration(duration)}

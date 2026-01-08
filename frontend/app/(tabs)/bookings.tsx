@@ -36,7 +36,9 @@ export default function BookingsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
   const [refreshing, setRefreshing] = useState(false);
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
-  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
+    null
+  );
 
   // Fetch bookings - API returns array directly
   const {
@@ -50,7 +52,8 @@ export default function BookingsScreen() {
 
   // Cancel booking mutation
   const cancelMutation = useMutation({
-    mutationFn: (bookingId: number) => bookingsApi.changeStatus(bookingId, "cancel"),
+    mutationFn: (bookingId: number) =>
+      bookingsApi.changeStatus(bookingId, "cancel"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       setCancelModalVisible(false);
@@ -89,21 +92,30 @@ export default function BookingsScreen() {
   };
 
   // Filter bookings based on active tab (API returns array directly)
-  const filteredBookings: Booking[] = bookings?.filter((booking: Booking) => {
-    const now = new Date();
-    const bookingDate = new Date(booking.startAt);
+  const filteredBookings: Booking[] =
+    bookings?.filter((booking: Booking) => {
+      const now = new Date();
+      const bookingDate = new Date(booking.startAt);
 
-    switch (activeTab) {
-      case "past":
-        return bookingDate < now || booking.status === "completed" || booking.status === "cancelled";
-      case "upcoming":
-        return bookingDate >= now && booking.status !== "cancelled" && booking.status !== "completed";
-      case "favorites":
-        return false; // Placeholder - no favorites API
-      default:
-        return true;
-    }
-  }) || [];
+      switch (activeTab) {
+        case "past":
+          return (
+            bookingDate < now ||
+            booking.status === "completed" ||
+            booking.status === "cancelled"
+          );
+        case "upcoming":
+          return (
+            bookingDate >= now &&
+            booking.status !== "cancelled" &&
+            booking.status !== "completed"
+          );
+        case "favorites":
+          return false; // Placeholder - no favorites API
+        default:
+          return true;
+      }
+    }) || [];
 
   const renderEmptyState = () => {
     switch (activeTab) {
@@ -120,7 +132,7 @@ export default function BookingsScreen() {
       <ScreenHeader title={t("booking.history")} />
 
       {/* Tabs */}
-      <View className="bg-white px-4 pb-4">
+      <View className="bg-white px-4 py-2 justify-center items-center">
         <CategoryTabs
           categories={tabs}
           selected={activeTab}
@@ -149,7 +161,9 @@ export default function BookingsScreen() {
                 id={booking.id.toString()}
                 shopName={booking.staff?.fullName || "Barbershop"}
                 shopImage={null}
-                status={booking.status}
+                status={
+                  booking.status === "confirm" ? "confirmed" : booking.status
+                }
                 date={booking.startAt}
                 time={new Date(booking.startAt).toLocaleTimeString("vi-VN", {
                   hour: "2-digit",
@@ -170,7 +184,8 @@ export default function BookingsScreen() {
                     : undefined
                 }
                 onRebook={
-                  booking.status === "completed" || booking.status === "cancelled"
+                  booking.status === "completed" ||
+                  booking.status === "cancelled"
                     ? () => handleRebook(booking.id)
                     : undefined
                 }
