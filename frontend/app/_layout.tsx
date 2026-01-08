@@ -32,6 +32,22 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 // Stores
 import { useAppStore, useAuthStore } from "@/src/stores";
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://78d6199504bfca5e8ab588b92c3c0e6b@o4510499515924480.ingest.us.sentry.io/4510675183468544',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Enable Logs
+  enableLogs: true,
+  integrations: [Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -40,7 +56,7 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const initialize = useAppStore((state) => state.initialize);
@@ -134,4 +150,4 @@ export default function RootLayout() {
       </QueryProvider>
     </ErrorBoundary>
   );
-}
+});
