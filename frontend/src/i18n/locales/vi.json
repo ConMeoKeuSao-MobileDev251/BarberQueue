@@ -18,7 +18,7 @@
   },
   "auth": {
     "login": "Đăng nhập",
-    "register": "Đăng kí",
+    "register": "Đăng ký",
     "logout": "Đăng xuất",
     "phoneNumber": "Số điện thoại",
     "password": "Mật khẩu",
