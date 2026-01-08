@@ -9,8 +9,8 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -155,11 +155,17 @@ export default function AuthScreen() {
       console.error("[Register] Error:", error);
       // Log axios error response for debugging
       if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data?: unknown; status?: number } };
+        const axiosError = error as {
+          response?: { data?: unknown; status?: number };
+        };
         console.error("[Register] Response data:", axiosError.response?.data);
-        console.error("[Register] Response status:", axiosError.response?.status);
+        console.error(
+          "[Register] Response status:",
+          axiosError.response?.status
+        );
       }
-      const message = error instanceof Error ? error.message : t("common.error");
+      const message =
+        error instanceof Error ? error.message : t("common.error");
       showToast(message, "error");
     },
   });
@@ -193,10 +199,17 @@ export default function AuthScreen() {
     <View className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={insets.top + 12}
         className="flex-1"
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingTop: insets.top }}
+        <KeyboardAwareScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom + 24,
+          }}
+          enableOnAndroid
+          extraScrollHeight={16}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -213,11 +226,13 @@ export default function AuthScreen() {
             </Text>
 
             <Text className="text-xl font-montserrat-semibold text-text-primary mt-2">
-              {activeTab === "login" ? "Welcome Back" : "Tạo tài khoản"}
+              {activeTab === "login"
+                ? t("auth.welcomeBack")
+                : t("auth.createAccount")}
             </Text>
 
             <Text className="text-md font-montserrat-regular text-text-secondary mt-1">
-              Book your cut in seconds
+              {t("auth.bookInSeconds")}
             </Text>
           </View>
 
@@ -391,7 +406,7 @@ export default function AuthScreen() {
 
           {/* Bottom spacing */}
           <View style={{ height: insets.bottom + 24 }} />
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </View>
   );

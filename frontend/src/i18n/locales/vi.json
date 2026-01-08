@@ -29,7 +29,10 @@
     "haveAccount": "Đã có tài khoản?",
     "loginSuccess": "Đăng nhập thành công",
     "registerSuccess": "Đăng ký thành công",
-    "logoutConfirm": "Bạn có chắc muốn đăng xuất?"
+    "logoutConfirm": "Bạn có chắc muốn đăng xuất?",
+    "welcomeBack": "Chào mừng trở lại",
+    "createAccount": "Tạo tài khoản",
+    "bookInSeconds": "Đặt lịch chỉ trong 1 phút"
   },
   "onboarding": {
     "slide1": {

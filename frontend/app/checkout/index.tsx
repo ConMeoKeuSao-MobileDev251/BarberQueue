@@ -9,7 +9,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useCartStore, useCartTotalItems, useCartTotalPrice, useCartTotalDuration } from "@/src/stores";
+import {
+  useCartStore,
+  useCartTotalItems,
+  useCartTotalPrice,
+  useCartTotalDuration,
+} from "@/src/stores";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { Avatar } from "@/src/components/ui/avatar";
 import { Button } from "@/src/components/ui/button";
@@ -23,14 +28,8 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const {
-    items,
-    branchName,
-    staffName,
-    dateTime,
-    updateQuantity,
-    removeItem,
-  } = useCartStore();
+  const { items, branchName, staffName, dateTime, updateQuantity, removeItem } =
+    useCartStore();
   const totalItems = useCartTotalItems();
   const totalPrice = useCartTotalPrice();
   const totalDuration = useCartTotalDuration();
@@ -95,7 +94,10 @@ export default function CheckoutScreen() {
     <View className="flex-1 bg-background-secondary">
       <ScreenHeader title={t("checkout.title")} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
         {/* Shop & Stylist Info */}
         <View className="bg-white mx-4 mt-4 rounded-xl p-4">
           <Text className="text-text-primary text-lg font-montserrat-bold">
@@ -107,16 +109,20 @@ export default function CheckoutScreen() {
             onPress={handleSelectStylist}
             className="flex-row items-center mt-3 py-3 border-t border-border-light"
           >
-            <Avatar source={null} name={staffName || "?"} size="md" />
+            <Avatar source={null} name={staffName || "Thợ bất kỳ"} size="md" />
             <View className="flex-1 ml-3">
               <Text className="text-text-secondary text-sm font-montserrat-regular">
                 {t("checkout.selectStylist")}
               </Text>
               <Text className="text-text-primary text-md font-montserrat-medium">
-                {staffName || "Chọn thợ"}
+                {staffName || "Thợ bất kỳ"}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textTertiary}
+            />
           </Pressable>
 
           {/* Date/Time Selection */}
@@ -135,7 +141,11 @@ export default function CheckoutScreen() {
                 {dateTime || "Chọn ngày & giờ"}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textTertiary}
+            />
           </Pressable>
         </View>
 
@@ -183,7 +193,11 @@ export default function CheckoutScreen() {
                   onPress={() => handleDeletePress(item.service.id)}
                   className="p-2"
                 >
-                  <Ionicons name="trash-outline" size={20} color={colors.coral} />
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={colors.coral}
+                  />
                 </Pressable>
               </View>
             </View>

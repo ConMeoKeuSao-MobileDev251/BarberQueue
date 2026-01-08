@@ -12,7 +12,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/src/stores";
 import { branchesApi } from "@/src/api";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
-import { StylistCard, AnyStylistCard } from "@/src/components/shared/stylist-card";
+import {
+  StylistCard,
+  AnyStylistCard,
+} from "@/src/components/shared/stylist-card";
 import { CategoryTabs } from "@/src/components/shared/filter-chips";
 import { Button } from "@/src/components/ui/button";
 import { colors } from "@/src/constants/theme";
@@ -30,7 +33,9 @@ export default function StylistScreen() {
 
   const { setStaff, staffId, branchId } = useCartStore();
   const [selectedTab, setSelectedTab] = useState("schedule");
-  const [selectedStylist, setSelectedStylist] = useState<number | null>(staffId);
+  const [selectedStylist, setSelectedStylist] = useState<number | null>(
+    staffId ?? null
+  );
 
   // Fetch staff for the branch
   const {
@@ -52,6 +57,10 @@ export default function StylistScreen() {
   };
 
   const handleContinue = () => {
+    // Ensure store is updated if using the default "Any Stylist" selection
+    if (selectedStylist === null) {
+      setStaff(null, "Thợ bất kỳ");
+    }
     router.push("/checkout/datetime" as never);
   };
 
@@ -68,7 +77,10 @@ export default function StylistScreen() {
         />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
         {selectedTab === "schedule" && (
           <View className="p-4 gap-3">
             {/* Any Stylist Option */}
@@ -109,18 +121,19 @@ export default function StylistScreen() {
             )}
 
             {/* Stylist List */}
-            {!isLoading && staffList.map((staff) => (
-              <StylistCard
-                key={staff.id}
-                id={staff.id.toString()}
-                name={staff.fullName}
-                specialty="Barber"
-                isAvailable={true}
-                avatar={null}
-                onPress={() => handleSelectStylist(staff.id, staff.fullName)}
-                selected={selectedStylist === staff.id}
-              />
-            ))}
+            {!isLoading &&
+              staffList.map((staff) => (
+                <StylistCard
+                  key={staff.id}
+                  id={staff.id.toString()}
+                  name={staff.fullName}
+                  specialty="Barber"
+                  isAvailable={true}
+                  avatar={null}
+                  onPress={() => handleSelectStylist(staff.id, staff.fullName)}
+                  selected={selectedStylist === staff.id}
+                />
+              ))}
           </View>
         )}
 
