@@ -139,7 +139,16 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <View className="absolute top-0 left-0 right-0 z-50 pt-12">
+    <View
+      style={{
+        position: "absolute",
+        top: 50,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        elevation: 9999,
+      }}
+    >
       {toasts.map((toast) => (
         <ToastItem
           key={toast.id}

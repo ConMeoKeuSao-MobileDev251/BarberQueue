@@ -7,7 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
 import { gradients } from "@/src/constants/theme";
 
-type ButtonVariant = "primary" | "secondary" | "destructive" | "text" | "gradient";
+type ButtonVariant = "primary" | "secondary" | "destructive" | "text" | "gradient" | "solid";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps {
@@ -69,6 +69,8 @@ export function Button({
         return `${baseContainer} bg-transparent`;
       case "gradient":
         return `${baseContainer}`;
+      case "solid":
+        return `${baseContainer} bg-primary shadow-md`;
       default:
         return `${baseContainer} bg-primary`;
     }
@@ -84,6 +86,7 @@ export function Button({
       case "primary":
       case "destructive":
       case "gradient":
+      case "solid":
         return `${baseText} text-white`;
       case "secondary":
       case "text":

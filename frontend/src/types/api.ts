@@ -20,8 +20,12 @@ export interface RegisterClientRequest {
   phoneNumber: string;
   password: string;
   fullName: string;
+  birthDate?: string;
   email?: string;
-  address?: CreateAddressRequest;
+  role?: "client";
+  addressText?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface ForgotPasswordRequest {

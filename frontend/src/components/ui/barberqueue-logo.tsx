@@ -9,13 +9,14 @@ import { Image } from "expo-image";
 const logoIcon = require("@/assets/barberqueue_logo_notext.png");
 
 interface BarberQueueLogoProps {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 const sizeConfig = {
   sm: { iconSize: 24, fontSize: "text-sm", gap: "gap-1" },
   md: { iconSize: 32, fontSize: "text-base", gap: "gap-1.5" },
   lg: { iconSize: 40, fontSize: "text-lg", gap: "gap-2" },
+  xl: { iconSize: 80, fontSize: "text-2xl", gap: "gap-3" },
 };
 
 export function BarberQueueLogo({ size = "md" }: BarberQueueLogoProps) {
