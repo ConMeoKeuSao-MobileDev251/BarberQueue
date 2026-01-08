@@ -2,7 +2,7 @@
  * Branch API Functions
  */
 import { apiClient } from "./client";
-import type { Branch, User } from "../types";
+import type { Branch, User, CreateBranchRequest } from "../types";
 
 // Default HCM center coordinates for fetching all branches
 const DEFAULT_HCM_COORDS = { latitude: 10.7769, longitude: 106.7009 };
@@ -61,5 +61,20 @@ export const branchesApi = {
       { params: { startTime, endTime } }
     );
     return response.data;
+  },
+
+  /**
+   * Create a new branch
+   */
+  create: async (data: CreateBranchRequest): Promise<Branch> => {
+    const response = await apiClient.post<Branch>("/branch", data);
+    return response.data;
+  },
+
+  /**
+   * Delete a branch by ID
+   */
+  delete: async (id: number): Promise<void> => {
+    await apiClient.delete(`/branch/${id}`);
   },
 };

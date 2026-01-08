@@ -2,7 +2,7 @@
  * Services API Functions
  */
 import { apiClient } from "./client";
-import type { Service } from "../types";
+import type { Service, CreateServiceRequest } from "../types";
 
 export const servicesApi = {
   /**
@@ -18,6 +18,14 @@ export const servicesApi = {
    */
   getById: async (id: number): Promise<Service> => {
     const response = await apiClient.get<Service>(`/barber-services/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new barber service
+   */
+  create: async (data: CreateServiceRequest): Promise<Service> => {
+    const response = await apiClient.post<Service>("/barber-services", data);
     return response.data;
   },
 };

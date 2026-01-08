@@ -3,8 +3,9 @@
  * Display shop info, services, and add to cart
  */
 import { View, Text, ScrollView, Pressable, Linking, Share } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as Sentry from "@sentry/react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -50,6 +51,20 @@ export default function ShopDetailsScreen() {
 
   // Use passed branch data or fetched branch data
   const branch = passedBranch || fetchedBranch || null;
+
+  // Track branch viewed event
+  useEffect(() => {
+    if (branch) {
+      Sentry.captureMessage("branch_viewed", {
+        level: "info",
+        tags: { action: "engagement" },
+        extra: {
+          branchId: branch.id,
+          branchName: branch.name,
+        },
+      });
+    }
+  }, [branch?.id]);
 
   // Auth store - check if user is client
   const { user, isAuthenticated } = useAuthStore();

@@ -32,6 +32,22 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 // Stores
 import { useAppStore, useAuthStore } from "@/src/stores";
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://78d6199504bfca5e8ab588b92c3c0e6b@o4510499515924480.ingest.us.sentry.io/4510675183468544',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Enable Logs
+  enableLogs: true,
+  integrations: [Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -40,7 +56,7 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const initialize = useAppStore((state) => state.initialize);
@@ -49,6 +65,7 @@ export default function RootLayout() {
   const restoreAuth = useAuthStore((state) => state.restoreAuth);
   const isAuthLoading = useAuthStore((state) => state.isLoading);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   // Load fonts
   const [fontsLoaded] = useFonts({
@@ -72,17 +89,36 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, isInitialized, isAuthLoading]);
 
-  // Auth guard - redirect based on auth state
+  // Auth guard - redirect based on auth state and role
   useEffect(() => {
-    if (!fontsLoaded || !isInitialized || isAuthLoading) return;
+    console.log("[Auth Guard] State:", {
+      fontsLoaded,
+      isInitialized,
+      isAuthLoading,
+      isAuthenticated,
+      onboardingComplete,
+      userRole: user?.role,
+      userId: user?.id,
+    });
+
+    if (!fontsLoaded || !isInitialized || isAuthLoading) {
+      console.log("[Auth Guard] Still loading, skipping redirect");
+      return;
+    }
 
     if (!onboardingComplete) {
+      console.log("[Auth Guard] Redirecting to onboarding");
       router.replace("/(onboarding)");
     } else if (!isAuthenticated) {
+      console.log("[Auth Guard] Not authenticated, redirecting to login");
       router.replace("/(auth)/login");
+    } else if (user?.role === "owner") {
+      console.log("[Auth Guard] Owner detected, redirecting to /(owner)");
+      router.replace("/(owner)" as never);
+    } else {
+      console.log("[Auth Guard] Client/Staff, staying on (tabs)");
     }
-    // If authenticated, stay on current route (tabs)
-  }, [fontsLoaded, isInitialized, isAuthLoading, isAuthenticated, onboardingComplete, router]);
+  }, [fontsLoaded, isInitialized, isAuthLoading, isAuthenticated, onboardingComplete, user?.role, router]);
 
   // Show nothing while loading
   if (!fontsLoaded || !isInitialized || isAuthLoading) {
@@ -95,12 +131,14 @@ export default function RootLayout() {
         <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(owner)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
             <Stack.Screen name="shop" options={{ headerShown: false }} />
             <Stack.Screen name="checkout" options={{ headerShown: false }} />
             <Stack.Screen name="booking" options={{ headerShown: false }} />
             <Stack.Screen name="account" options={{ headerShown: false }} />
+            <Stack.Screen name="owner" options={{ headerShown: false }} />
             <Stack.Screen
               name="modal"
               options={{ presentation: "modal", title: "Modal" }}
@@ -112,4 +150,4 @@ export default function RootLayout() {
       </QueryProvider>
     </ErrorBoundary>
   );
-}
+});

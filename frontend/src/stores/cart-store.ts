@@ -3,6 +3,7 @@
  * Manages shopping cart state for booking services
  */
 import { create } from "zustand";
+import * as Sentry from "@sentry/react-native";
 import type { Service, CartItem } from "../types";
 
 interface CartState {
@@ -13,6 +14,8 @@ interface CartState {
   staffId: number | null;
   staffName: string | null;
   dateTime: string | null;
+  promoCode: string | null;
+  promoDiscount: number; // percentage (e.g., 20 for 20%)
 
   // Actions
   addItem: (service: Service) => void;
@@ -21,6 +24,7 @@ interface CartState {
   setBranch: (branchId: number, branchName: string) => void;
   setStaff: (staffId: number | null, staffName: string) => void;
   setDateTime: (dateTime: string) => void;
+  setPromo: (code: string | null, discount: number) => void;
   clearCart: () => void;
 }
 
@@ -32,9 +36,22 @@ export const useCartStore = create<CartState>()((set, get) => ({
   staffId: null,
   staffName: null,
   dateTime: null,
+  promoCode: null,
+  promoDiscount: 0,
 
   // Add service to cart
   addItem: (service) => {
+    // Track service added event
+    Sentry.captureMessage("service_added", {
+      level: "info",
+      tags: { action: "cart" },
+      extra: {
+        serviceId: service.id,
+        serviceName: service.name,
+        price: service.price,
+      },
+    });
+
     set((state) => {
       const existingItem = state.items.find(
         (item) => item.service.id === service.id
@@ -98,6 +115,11 @@ export const useCartStore = create<CartState>()((set, get) => ({
     set({ dateTime });
   },
 
+  // Set promo code
+  setPromo: (code, discount) => {
+    set({ promoCode: code, promoDiscount: discount });
+  },
+
   // Clear cart
   clearCart: () => {
     set({
@@ -107,6 +129,8 @@ export const useCartStore = create<CartState>()((set, get) => ({
       staffId: null,
       staffName: null,
       dateTime: null,
+      promoCode: null,
+      promoDiscount: 0,
     });
   },
 }));
@@ -128,6 +152,25 @@ export const useCartTotalItems = () =>
   useCartStore((state) =>
     state.items.reduce((sum, item) => sum + item.quantity, 0)
   );
+
+export const useCartDiscount = () =>
+  useCartStore((state) => {
+    const subtotal = state.items.reduce(
+      (sum, item) => sum + item.service.price * item.quantity,
+      0
+    );
+    return Math.round((subtotal * state.promoDiscount) / 100);
+  });
+
+export const useCartFinalPrice = () =>
+  useCartStore((state) => {
+    const subtotal = state.items.reduce(
+      (sum, item) => sum + item.service.price * item.quantity,
+      0
+    );
+    const discount = Math.round((subtotal * state.promoDiscount) / 100);
+    return subtotal - discount;
+  });
 
 // Legacy aliases for backward compatibility
 export const useCartTotal = useCartTotalPrice;

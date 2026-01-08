@@ -14,6 +14,8 @@ import {
   useCartTotalItems,
   useCartTotalPrice,
   useCartTotalDuration,
+  useCartDiscount,
+  useCartFinalPrice,
 } from "@/src/stores";
 import { ScreenHeader } from "@/src/components/layout/screen-header";
 import { Avatar } from "@/src/components/ui/avatar";
@@ -28,11 +30,13 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const { items, branchName, staffName, dateTime, updateQuantity, removeItem } =
+  const { items, branchName, staffName, dateTime, promoCode, updateQuantity, removeItem } =
     useCartStore();
   const totalItems = useCartTotalItems();
   const totalPrice = useCartTotalPrice();
   const totalDuration = useCartTotalDuration();
+  const discount = useCartDiscount();
+  const finalPrice = useCartFinalPrice();
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
@@ -209,14 +213,27 @@ export default function CheckoutScreen() {
           onPress={handleViewPromos}
           className="bg-white mx-4 mt-4 rounded-xl p-4 flex-row items-center"
         >
-          <Ionicons name="pricetag" size={24} color={colors.primary} />
-          <Text className="flex-1 ml-3 text-text-primary text-md font-montserrat-medium">
-            {t("checkout.promo")}
-          </Text>
-          <Text className="text-primary text-sm font-montserrat-medium mr-1">
-            {t("checkout.viewPromos")}
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+          <Ionicons name="pricetag" size={24} color={promoCode ? colors.success : colors.primary} />
+          <View className="flex-1 ml-3">
+            <Text className="text-text-primary text-md font-montserrat-medium">
+              {t("checkout.promo")}
+            </Text>
+            {promoCode && (
+              <Text className="text-success text-sm font-montserrat-regular">
+                {promoCode} - Giảm 20%
+              </Text>
+            )}
+          </View>
+          {promoCode ? (
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+          ) : (
+            <>
+              <Text className="text-primary text-sm font-montserrat-medium mr-1">
+                {t("checkout.viewPromos")}
+              </Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+            </>
+          )}
         </Pressable>
 
         {/* Price Summary */}
@@ -231,10 +248,10 @@ export default function CheckoutScreen() {
           </View>
           <View className="flex-row justify-between py-2">
             <Text className="text-text-secondary text-md font-montserrat-regular">
-              {t("checkout.discount")}
+              {t("checkout.discount")} {promoCode && `(${promoCode})`}
             </Text>
             <Text className="text-success text-md font-montserrat-medium">
-              -0đ
+              -{formatPrice(discount)}
             </Text>
           </View>
           <View className="flex-row justify-between py-2 border-t border-border-light mt-2">
@@ -242,7 +259,7 @@ export default function CheckoutScreen() {
               {t("checkout.total")}
             </Text>
             <Text className="text-primary text-lg font-montserrat-bold">
-              {formatPrice(totalPrice)}
+              {formatPrice(finalPrice)}
             </Text>
           </View>
           <Text className="text-text-tertiary text-sm font-montserrat-regular mt-1">

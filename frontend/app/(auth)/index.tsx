@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import * as Sentry from "@sentry/react-native";
 
 import { authApi } from "@/src/api/auth";
 import { useAuthStore } from "@/src/stores";
@@ -115,6 +116,9 @@ export default function AuthScreen() {
       };
       await setAuth(tempUser, data.accessToken);
 
+      // Track final role for redirect
+      let finalRole = data.role;
+
       // Fetch complete user profile
       try {
         const profileResponse = await authApi.getCurrentUser();
@@ -130,12 +134,26 @@ export default function AuthScreen() {
           email: profileResponse.email ?? tempUser.email,
         };
         await setAuth(fullUser, data.accessToken);
+        finalRole = fullUser.role;
       } catch (error) {
         console.error("[Auth] Failed to fetch user profile:", error);
       }
 
       showToast(t("auth.loginSuccess"), "success");
-      router.replace("/(tabs)");
+
+      // Track login event
+      Sentry.captureMessage("user_login", {
+        level: "info",
+        tags: { action: "login", role: finalRole },
+      });
+      Sentry.setUser({ id: String(tempUser.id || 0), role: finalRole });
+
+      // Redirect based on role
+      if (finalRole === "owner") {
+        router.replace("/(owner)" as never);
+      } else {
+        router.replace("/(tabs)");
+      }
     },
     onError: (error: Error) => {
       showToast(error.message || t("common.error"), "error");
@@ -147,6 +165,12 @@ export default function AuthScreen() {
     mutationFn: authApi.registerClient,
     onSuccess: async (response) => {
       console.log("[Register] Success:", response);
+
+      // Track registration event
+      Sentry.captureMessage("user_register", {
+        level: "info",
+        tags: { action: "register", role: "client" },
+      });
       showToast(t("auth.registerSuccess"), "success");
       setActiveTab("login");
       registerForm.reset();
